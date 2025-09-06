@@ -34,5 +34,5 @@ public class Player {
     public void setPassword(String password){this.password = password;}
 
     public Set<Deck> getDecks(){return decks;}
-    public void setDecks(Set<Deck> decks){this.decks = decks;}
+    public void setDecks(Set<Deck> decks){this.decks=decks;}
 }

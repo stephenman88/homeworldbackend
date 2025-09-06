@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public interface DeckService {
     List<DeckDTO> getAllDecks();
-    Optional<DeckDTO> findDeckById(Long id);
+    Optional<DeckDTO> getDeckById(Long id);
     DeckDTO saveDeck(DeckDTO deckDTO);
-    DeckDTO updateDeck(DeckDTO deckDTO);
+    DeckDTO updateDeck(Long id, DeckDTO deckDTO);
     void deleteDeck(Long id);
 }

@@ -1,7 +1,9 @@
 package com.arcaelo.homeworldbackend.service;
 
+import com.arcaelo.homeworldbackend.model.DeckMapper;
 import com.arcaelo.homeworldbackend.model.Player;
 import com.arcaelo.homeworldbackend.model.PlayerDTO;
+import com.arcaelo.homeworldbackend.model.PlayerMapper;
 import com.arcaelo.homeworldbackend.repo.PlayerRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,11 @@ import java.util.stream.Collectors;
 @Service
 public class PlayerServiceImp implements PlayerService{
     private final PlayerRepository playerRepository;
+    private final PlayerMapper playerMapper;
 
-    public PlayerServiceImp(PlayerRepository playerRepository){
+    public PlayerServiceImp(PlayerRepository playerRepository, DeckMapper deckMapper, PlayerMapper playerMapper){
         this.playerRepository = playerRepository;
+        this.playerMapper = playerMapper;
     }
 
     @Override
@@ -39,8 +43,7 @@ public class PlayerServiceImp implements PlayerService{
     @Override
     public PlayerDTO updatePlayer(Long id, PlayerDTO playerDTO){
         Player player = playerRepository.findById(id).orElseThrow();
-        player.setEmail(playerDTO.email());
-        player.setPassword(playerDTO.password());
+        player.setEmail(playerDTO.getEmail());
         Player updatedPlayer = playerRepository.save(player);
         return convertToDTO(updatedPlayer);
     }
@@ -51,13 +54,10 @@ public class PlayerServiceImp implements PlayerService{
     }
 
     private PlayerDTO convertToDTO(Player player){
-        return new PlayerDTO(player.getId(), player.getEmail(), player.getPassword());
+        return playerMapper.toDTO(player);
     }
 
     private Player convertToEntity(PlayerDTO playerDTO){
-        Player player = new Player();
-        player.setEmail(playerDTO.email());
-        player.setPassword(playerDTO.password());
-        return player;
+        return playerMapper.toEntity(playerDTO);
     }
 }

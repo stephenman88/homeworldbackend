@@ -25,7 +25,7 @@ public class PlayerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlayerDTO> getPlayersById(@PathVariable Long id){
+    public ResponseEntity<PlayerDTO> getPlayerById(@PathVariable Long id){
         Optional<PlayerDTO> player = playerService.getPlayerById(id);
         return player.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
