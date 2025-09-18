@@ -1,4 +1,4 @@
-package com.arcaelo.homeworldbackend.model;
+package com.arcaelo.homeworldbackend.unit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +7,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com.arcaelo.homeworldbackend.model.Card;
+import com.arcaelo.homeworldbackend.model.CardDTO;
+import com.arcaelo.homeworldbackend.model.CardMapper;
+import com.arcaelo.homeworldbackend.model.CardMapperImpl;
+import com.arcaelo.homeworldbackend.model.Edition;
 import com.arcaelo.homeworldbackend.repo.EditionRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
