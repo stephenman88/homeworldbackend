@@ -41,6 +41,7 @@ public abstract class CardMapper {
         card.setReferencedBy(cardDTO.getReferencedBy());
         card.setReferences(cardDTO.getReferences());
         card.setRule(cardDTO.getRule());
+        card.setSlug(cardDTO.getSlug());
         card.setSpeed(cardDTO.getSpeed());
         card.setSubtypes(cardDTO.getSubtypes());
         card.setTypes(cardDTO.getTypes());

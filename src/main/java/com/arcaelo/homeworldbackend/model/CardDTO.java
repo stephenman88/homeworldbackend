@@ -21,8 +21,8 @@ public class CardDTO {
     private Integer life;
     private String name;
     private Integer power;
-    private HashMap<String, String> referencedBy;
-    private HashMap<String, String> references;
+    private List<HashMap<String, String>> referencedBy;
+    private List<HashMap<String, String>> references;
     private Set<HashMap<String, String>> rule;
     private Boolean speed;
     private String slug;
@@ -60,10 +60,10 @@ public class CardDTO {
     public void setName(String name){this.name = name;}
     public Integer getPower(){return power;}
     public void setPower(Integer power){this.power = power;}
-    public HashMap<String, String> getReferencedBy(){return referencedBy;}
-    public void setReferencedBy(HashMap<String, String> referencedBy){this.referencedBy = referencedBy;}
-    public HashMap<String, String> getReferences(){return references;}
-    public void setReferences(HashMap<String, String> references){this.references = references;}
+    public List<HashMap<String, String>> getReferencedBy(){return referencedBy;}
+    public void setReferencedBy(List<HashMap<String, String>> referencedBy){this.referencedBy = referencedBy;}
+    public List<HashMap<String, String>> getReferences(){return references;}
+    public void setReferences(List<HashMap<String, String>> references){this.references = references;}
     public Set<HashMap<String, String>> getRule(){return rule;}
     public void setRule(Set<HashMap<String, String>> rule){this.rule = rule;}
     public Boolean getSpeed(){return speed;}
