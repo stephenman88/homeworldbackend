@@ -6,9 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.arcaelo.homeworldbackend.repo.CardRepository;
 import com.arcaelo.homeworldbackend.repo.CardSpecHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -24,33 +22,52 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class CardServiceImp implements CardService {
-    private final ObjectMapper objectMapper;
     private final CardRepository cardRepository;
     private final CardMapper cardMapper;
     private final WebClient webClient;
+    private final EditionService editionService;
 
-    public CardServiceImp(CardRepository cardRepository, CardMapper cardMapper, WebClient.Builder webClientBuilder, ObjectMapper objectMapper, @Value("${gaApiUrl}") String gaApiUrl){
+    public CardServiceImp(CardRepository cardRepository,
+    CardMapper cardMapper,
+    WebClient.Builder webClientBuilder,
+    @Value("${gaApiUrl}") String gaApiUrl,
+    EditionService editionService){
         this.cardRepository = cardRepository;
         this.cardMapper = cardMapper;
         this.webClient = webClientBuilder.baseUrl(gaApiUrl).build();
-        this.objectMapper = objectMapper;
+        this.editionService = editionService; 
     }
 
+    @Transactional
     @Override
     public List<CardDTO> pullCards() throws RuntimeException{
         try{
             JsonNode results = webClient.get().uri("/card/search").retrieve().bodyToMono(JsonNode.class).block();
-            System.out.println("data array: " + results.path("data"));
-            List<CardDTO> cardDTOs = convertToDTOs(results.path("data"));
-
+            List<CardDTO> cardDTOs = new ArrayList<CardDTO>();
+            HashMap<String, Set<String>> cardSetEditionIds = new HashMap<String, Set<String>>();
+            for(JsonNode cardNode : results.path("data")){
+                cardDTOs.add(convertToDTO(cardNode));
+                for(JsonNode editionNode : cardNode.path("editions")){
+                    JsonNode setNode = editionNode.path("set");
+                    if(cardSetEditionIds.containsKey(setNode.path("id").asText())){
+                        cardSetEditionIds.get(setNode.path("id").asText()).add(editionNode.path("uuid").asText());
+                    }else{
+                        cardSetEditionIds.put(setNode.path("id").asText(), Set.of(editionNode.path("uuid").asText()));
+                    }
+                }
+            }
             List<Card> cards = cardDTOs.stream()
                 .map(dto -> {return convertToEntity(dto);}).toList();
             List<Card> savedCards = cardRepository.saveAll(cards);
             List<CardDTO> savedCardDTOs = savedCards.stream()
                 .map(c -> convertToDTO(c)).toList();
+
+            editionService.extractEditions(results);
+            
             return savedCardDTOs;
         }catch(Exception e){
             throw new RuntimeException("Failed to pull cards", e);
@@ -180,8 +197,92 @@ public class CardServiceImp implements CardService {
         return cardMapper.toEntity(cardDTO);
     }
 
-    private CardDTO convertToDTO(JsonNode jsonNode) throws JsonProcessingException{
-        return objectMapper.treeToValue(jsonNode, CardDTO.class);
+    private CardDTO convertToDTO(JsonNode cardNode) throws JsonProcessingException{
+            JsonNode node = cardNode;
+            CardDTO dto = new CardDTO();
+            dto.setUUID(node.path("uuid").asText());
+            
+            HashSet<String> classes = new HashSet<String>();
+            for(int c = 0; node.path("classes").get(c) != null; c++){
+                classes.add(node.path("classes").path(c).asText());
+            }
+            dto.setClasses(classes);
+            dto.setCostMemory(node.path("cost_memory").isNull() ? null : node.path("cost_memory").numberValue().intValue());
+            dto.setCostReserve(node.path("cost_reserve").isNull() ? null : node.path("cost_reserve").numberValue().intValue());
+            dto.setDurability(node.path("durability").isNull() ? null : node.path("durability").numberValue().intValue());
+            
+            ArrayList<String> editionIds = new ArrayList<String>();
+            for(int c = 0; node.path("editions").get(c) != null; c++){
+                editionIds.add(node.path("editions").path(c).path("uuid").asText());
+            }
+            dto.setEditionIds(editionIds);
+
+            HashSet<String> elements= new HashSet<String>();
+            for(int c = 0; node.path("elements").get(c) != null; c++){
+                elements.add(node.path("elements").path(c).asText());
+            }
+            dto.setElements(elements);
+
+            dto.setEffect(node.path("effect").isNull() ? null : node.path("effect").asText());
+            dto.setEffectRaw(node.path("effect_raw").isNull() ? null : node.path("effect_raw").asText());
+            dto.setFlavor(node.path("flavor").isNull() ? null : node.path("flavor").asText());
+            dto.setLegality(null);
+            dto.setLevel(node.path("level").isNull() ? null : node.path("level").numberValue().intValue());
+            dto.setLife(node.path("life").isNumber() ? node.path("life").asInt() : null);
+            dto.setName(node.path("name").asText());
+            dto.setPower(node.path("power").isNumber() ? node.path("power").intValue() : null);
+
+            List<HashMap<String, String>> referencedBy = new ArrayList<HashMap<String, String>>();
+            for(int c = 0; node.path("referenced_by").get(c) != null; c++){
+                JsonNode rbNode = node.path("referenced_by").path(c);
+                HashMap<String, String> rb = new HashMap<String, String>();
+
+                rb.put("direction", rbNode.path("direction").asText());
+                rb.put("kind", rbNode.path("kind").asText());
+                rb.put("name", rbNode.path("name").asText());
+                rb.put("slug", rbNode.path("slug").asText());
+                referencedBy.add(rb);
+            }
+            dto.setReferencedBy(referencedBy);
+
+            List<HashMap<String, String>> referenceList = new ArrayList<HashMap<String, String>>();
+            for(int c = 0; node.path("references").get(c) != null; c++){
+                HashMap<String, String> references = new HashMap<String, String>();
+                references.put("direction", node.path("references").path("direction").asText());
+                references.put("kind", node.path("references").path("kind").asText());
+                references.put("name", node.path("references").path("name").asText());
+                references.put("slug", node.path("references").path("slug").asText());
+                referenceList.add(references);
+            }
+            
+            dto.setReferences(referenceList);
+
+            HashSet<HashMap<String, String>> rules = new HashSet<HashMap<String, String>>();
+            for(int c = 0; node.path("rule").get(c) != null; c++){
+                HashMap<String, String> rule = new HashMap<String, String>();
+                rule.put("date_added", node.path("rule").path(c).path("date_added").asText());
+                rule.put("description", node.path("description").path(c).path("description").asText());
+                rule.put("title", node.path("title").path(c).path("title").asText());
+                rules.add(rule);
+            }
+            dto.setRule(rules);
+
+            dto.setSpeed(node.path("speed").isBoolean() ? node.path("speed").booleanValue() : null);
+            dto.setSlug(node.path("slug").isNull() ? null : node.path("slug").asText());
+            
+            HashSet<String> subtypes = new HashSet<String>();
+            for(int c = 0; node.path("subtypes").get(c) != null; c++){
+                subtypes.add(node.path("subtypes").path(c).asText());
+            }
+            dto.setSubtypes(subtypes);
+
+            HashSet<String> types = new HashSet<String>();
+            for(int c = 0; node.path("types").get(c) != null; c++){
+                types.add(node.path("types").path(c).asText());
+            }
+            dto.setTypes(types);
+
+            return dto;
     }
 
     private List<CardDTO> convertToDTOs(JsonNode jsonNode) throws JsonProcessingException{

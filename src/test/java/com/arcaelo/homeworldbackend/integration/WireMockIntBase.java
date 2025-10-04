@@ -6,6 +6,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 
 public abstract class WireMockIntBase {
     public static WireMockServer wireMockServer;
@@ -14,6 +15,7 @@ public abstract class WireMockIntBase {
     static void startWireMock(){
         wireMockServer = new WireMockServer(9561);
         wireMockServer.start();
+        WireMock.configureFor("localhost", 9561);
     }
 
     @AfterAll

@@ -30,6 +30,7 @@ public class CardServiceTests extends WireMockIntBase{
 
     @BeforeEach
     void setupStub(){
+        wireMockServer.resetAll();
         String mockResponse = """
                 {
   "data": [
@@ -193,7 +194,7 @@ public class CardServiceTests extends WireMockIntBase{
   "total_pages": 1
 }
                 """;
-                wireMockServer.stubFor(WireMock.get("/card/search")
+                wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
                     .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody(mockResponse)
