@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import com.arcaelo.homeworldbackend.repo.CardRepository;
 import com.arcaelo.homeworldbackend.service.CardService;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.arcaelo.homeworldbackend.model.Card;
 import com.arcaelo.homeworldbackend.model.CardDTO;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 @SpringBootTest(classes = TestWebClientConfig.class)
 @TestPropertySource(properties = "gaApiUrl=http://localhost:9561")
@@ -25,223 +27,191 @@ public class CardServiceTests extends WireMockIntBase{
     @Autowired
     private CardService cardService;
 
-    @Autowired
-    private CardRepository cardRepository;
-
     @BeforeEach
-    void setupStub(){
+    void setupStub() throws IOException{
         wireMockServer.resetAll();
-        String mockResponse = """
-                {
-  "data": [
-    {
-      "classes": [
-        "WARRIOR"
-      ],
-      "cost_memory": 1,
-      "cost_reserve": null,
-      "created_at": "2024-10-11T12:00:00+00:00",
-      "durability": 3,
-      "editions": [
-        {
-          "card_id": "abcde12345",
-          "circulationTemplates": [
-            {
-              "kind": "FOIL",
-              "population": 100,
-              "population_operator": "=",
-              "printing": false,
-              "created_at": "2024-10-11T12:00:00+00:00",
-              "edition_id": "abcde12345",
-              "foil": false,
-              "uuid": "abcde12345",
-              "variants": [],
-              "name": "AMB NF C 2"
-            }
-          ],
-          "circulations": [],
-          "collaborators": [],
-          "collector_number": "010",
-          "configuration": "default",
-          "created_at": "2024-10-11T12:00:00+00:00",
-          "effect": null,
-          "effect_html": null,
-          "effect_raw": null,
-          "flavor": "The centerpiece of the Imperial Armory.",
-          "illustrator": "Dragonart",
-          "image": "text",
-          "last_update": "2024-10-11T12:00:00+00:00",
-          "orientation": null,
-          "other_orientations": [],
-          "rarity": 1,
-          "slug": "crescent-glaive-amb",
-          "set": {
-            "created_at": "2024-10-11T12:00:00+00:00",
-            "id": "abcde12345",
-            "language": "EN",
-            "last_update": "2024-10-11T12:00:00+00:00",
-            "name": "Mortal Ambition",
-            "prefix": "AMB",
-            "release_date": "2024-10-11T00:00:00"
-          },
-          "thema_charm_foil": null,
-          "thema_ferocity_foil": null,
-          "thema_foil": null,
-          "thema_grace_foil": null,
-          "thema_mystique_foil": null,
-          "thema_valor_foil": null,
-          "thema_charm_nonfoil": null,
-          "thema_ferocity_nonfoil": null,
-          "thema_grace_nonfoil": null,
-          "thema_mystique_nonfoil": null,
-          "thema_nonfoil": null,
-          "thema_valor_nonfoil": null,
-          "uuid": "abcde12345"
-        }
-      ],
-      "elements": [
-        "WATER"
-      ],
-      "effect": "[Class Bonus] [Level 2+] CARDNAME gets +1 [POWER]. *(Apply this effect only if your champion's class matches this card's class and only if your champion is level 2 or higher.)*",
-      "effect_raw": "[Class Bonus] [Level 2+] Crescent Glaive gets +1 POWER. (Apply this effect only if your champion's class matches this card's class and only if your champion is level 2 or higher.)",
-      "flavor": "Convalescing waves cascade through the soul, revitalizing the body and mind from the depths.",
-      "last_update": "2024-10-11T12:00:00+00:00",
-      "legality": null,
-      "level": null,
-      "life": null,
-      "name": "Crescent Glaive",
-      "power": 1,
-      "referenced_by": [],
-      "references": [],
-      "result_editions": [
-        {
-          "card_id": "abcde12345",
-          "circulationTemplates": [
-            {
-              "kind": "FOIL",
-              "population": 100,
-              "population_operator": "=",
-              "printing": false,
-              "created_at": "2024-10-11T12:00:00+00:00",
-              "edition_id": "abcde12345",
-              "foil": false,
-              "uuid": "abcde12345",
-              "variants": [],
-              "name": "AMB NF C 2"
-            }
-          ],
-          "circulations": [],
-          "collaborators": [],
-          "collector_number": "010",
-          "configuration": "default",
-          "created_at": "2024-10-11T12:00:00+00:00",
-          "effect": null,
-          "effect_html": null,
-          "effect_raw": null,
-          "flavor": "The centerpiece of the Imperial Armory.",
-          "illustrator": "Dragonart",
-          "image": "text",
-          "last_update": "2024-10-11T12:00:00+00:00",
-          "orientation": null,
-          "other_orientations": [],
-          "rarity": 1,
-          "slug": "crescent-glaive-amb",
-          "set": {
-            "created_at": "2024-10-11T12:00:00+00:00",
-            "id": "abcde12345",
-            "language": "EN",
-            "last_update": "2024-10-11T12:00:00+00:00",
-            "name": "Mortal Ambition",
-            "prefix": "AMB",
-            "release_date": "2024-10-11T00:00:00"
-          },
-          "thema_charm_foil": null,
-          "thema_ferocity_foil": null,
-          "thema_foil": null,
-          "thema_grace_foil": null,
-          "thema_mystique_foil": null,
-          "thema_valor_foil": null,
-          "thema_charm_nonfoil": null,
-          "thema_ferocity_nonfoil": null,
-          "thema_grace_nonfoil": null,
-          "thema_mystique_nonfoil": null,
-          "thema_nonfoil": null,
-          "thema_valor_nonfoil": null,
-          "uuid": "abcde12345"
-        }
-      ],
-      "rule": [],
-      "speed": null,
-      "slug": "crescent-glaive",
-      "subtypes": [
-        "WARRIOR",
-        "POLEARM"
-      ],
-      "types": [
-        "REGALIA",
-        "WEAPON"
-      ],
-      "uuid": "abcde12345"
-    }
-  ],
-  "has_more": false,
-  "order": "ASC",
-  "page": 1,
-  "page_size": 30,
-  "paginated_cards_count": 1,
-  "sort": "collector_number",
-  "total_cards": 1,
-  "total_pages": 1
-}
-                """;
-                wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
-                    .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(mockResponse)
-                        .withStatus(200)
-                    )
-                );  
+        String mockResponsePage1 = Files.readString(Paths.get("src\\test\\java\\com\\arcaelo\\homeworldbackend\\resources\\MockResponsePage1.json"));
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
+            .withQueryParam("page", WireMock.equalTo("1"))
+            .willReturn(WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(mockResponsePage1)
+            .withStatus(200)
+            )
+        );
+
+        String mockResponsePage2 = Files.readString(
+            Paths.get("src\\test\\java\\com\\arcaelo\\homeworldbackend\\resources\\MockResponsePage2.json")
+        );
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
+            .withQueryParam("page", WireMock.equalTo("2"))
+            .willReturn(WireMock.aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(mockResponsePage2)
+                .withStatus(200)
+            )
+        );
+
+        String mockResponsePage3 = Files.readString(
+            Paths.get("src\\test\\java\\com\\arcaelo\\homeworldbackend\\resources\\MockResponsePageEmpty.json")
+        );
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
+            .withQueryParam("page", WireMock.equalTo("3"))
+            .willReturn(WireMock.aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(mockResponsePage3)
+                .withStatus(200))
+        );
     }
 
     @Test
-    void pullCards_fetchesFromApiAndSavesToDb(){
-        List<CardDTO> result = cardService.pullCards();
+    void pullOnePage_fetchesFromApiAndSavesToDb(){
+        List<CardDTO> result = cardService.pullCards(1);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertEquals(30, result.size());
         
-        List<Card> cards = cardRepository.findAll();
-        assertEquals(1, cards.size());
-        assertTrue(cards.stream().anyMatch(c -> "abcde12345".equals(c.getUUID())));
+        assertApotheosisRite();
+        assertSpiritOfSlime();
+    }
+
+    @Test
+    void pullAllCards_fetchesFromApiAndSavesToDb(){
+        List<CardDTO> result = cardService.pullAllCards();
+
+        assertNotNull(result);
+        assertEquals(60, result.size());
         
-        CardDTO dto = cardService.getCardById("abcde12345").orElseThrow();
+        assertApotheosisRite();
+        assertSpiritOfSlime();
+
+        assertInsigniaOfCorhazi();
+    }
+
+    void assertApotheosisRite(){
+        CardDTO dto = cardService.getCardById("df594Qoszn").orElseThrow();
         assertTrue(dto.getClasses().contains("WARRIOR"));
-        assertEquals(1, dto.getCostMemory());
+        assertEquals(0, dto.getCostMemory());
         assertTrue(dto.getCostReserve() == null);
-        assertEquals(3, dto.getDurability());
-        assertTrue(dto.getElements().contains("WATER"));
+        assertTrue(dto.getDurability() == null);
+        assertTrue(dto.getElements().contains("NORM"));
         assertEquals(
-            "[Class Bonus] [Level 2+] CARDNAME gets +1 [POWER]. *(Apply this effect only if your champion's class matches this card's class and only if your champion is level 2 or higher.)*", 
+            "**Divine Relic**\n\n**Banish CARDNAME:** Your champion becomes an Ascendant in addition to its other types. Draw a card.", 
             dto.getEffect());
         assertEquals(
-            "[Class Bonus] [Level 2+] Crescent Glaive gets +1 POWER. (Apply this effect only if your champion's class matches this card's class and only if your champion is level 2 or higher.)",
+            "Divine Relic\n\nBanish Apotheosis Rite: Your champion becomes an Ascendant in addition to its other types. Draw a card.",
             dto.getEffectRaw()
         );
         assertEquals(
-            "Convalescing waves cascade through the soul, revitalizing the body and mind from the depths.",
+            "\"Only one will rise above.\"",
             dto.getFlavor()
         );
         assertNull(dto.getLegality());
         assertNull(dto.getLevel());
         assertNull(dto.getLife());
-        assertEquals("Crescent Glaive", dto.getName());
-        assertEquals(1, dto.getPower());
+        assertEquals("Apotheosis Rite", dto.getName());
+        assertTrue(dto.getPower() == null);
         assertEquals(0, dto.getReferencedBy().size());
         assertEquals(0, dto.getReferences().size());
         assertEquals(0, dto.getRule().size());
         assertTrue(dto.getSpeed() == null);
-        assertEquals("crescent-glaive", dto.getSlug());
-        assertTrue(dto.getSubtypes().containsAll(List.of("WARRIOR", "POLEARM")));
-        assertTrue(dto.getTypes().containsAll(List.of("REGALIA", "WEAPON")));
+        assertEquals("apotheosis-rite", dto.getSlug());
+        assertTrue(dto.getSubtypes().containsAll(List.of("WARRIOR", "RING")));
+        assertTrue(dto.getTypes().containsAll(List.of("REGALIA", "ITEM")));
+    }
+
+    void assertSpiritOfSlime(){
+        CardDTO dto = cardService.getCardById("0xp4xq07vv").orElseThrow();
+        assertTrue(dto.getClasses().contains("SPIRIT"));
+        assertEquals(0, dto.getCostMemory());
+        assertTrue(dto.getCostReserve() == null);
+        assertTrue(dto.getDurability() == null);
+        assertTrue(dto.getElements().contains("NORM"));
+        assertEquals(
+            "**On Enter:**Draw seven cards.\n\n**Inherited Effect:** Ignore the elemental requirements of basic element Slime cards you activate.", 
+            dto.getEffect());
+        assertEquals(
+            "On Enter:Draw seven cards.\n\nInherited Effect: Ignore the elemental requirements of basic element Slime cards you activate.",
+            dto.getEffectRaw()
+        );
+        assertEquals(
+            "An aura of amiability radiates from the soul, but for some reason, it feels a bit sticky.",
+            dto.getFlavor()
+        );
+        assertNull(dto.getLegality());
+        assertEquals(0, dto.getLevel());
+        assertEquals(15, dto.getLife());
+        assertEquals("Spirit of Slime", dto.getName());
+        assertTrue(dto.getPower() == null);
+        assertEquals(0, dto.getReferencedBy().size());
+        assertEquals(0, dto.getReferences().size());
+        assertEquals(0, dto.getRule().size());
+        assertTrue(dto.getSpeed() == null);
+        assertEquals("spirit-of-slime", dto.getSlug());
+        assertTrue(dto.getSubtypes().containsAll(List.of("SPIRIT")));
+        assertTrue(dto.getTypes().containsAll(List.of("CHAMPION")));
+    }
+
+    void assertInsigniaOfCorhazi(){
+        CardDTO dto = cardService.getCardById("52u81v4c0z").orElseThrow();
+        assertTrue(dto.getClasses().contains("ASSASSIN"));
+        assertEquals(0, dto.getCostMemory());
+        assertTrue(dto.getCostReserve() == null);
+        assertTrue(dto.getDurability() == null);
+        assertTrue(dto.getElements().contains("LUXEM"));
+        assertEquals(
+            "**(3), [REST]:** Put a **preparation** counter on your champion.\n\n[Class Bonus] Whenever you activate a **prepared** card while your **influence** is six or less, draw a card into your memory.", 
+            dto.getEffect());
+        assertEquals(
+            "(3), REST: Put a preparation counter on your champion.\n\n[Class Bonus] Whenever you activate a prepared card while your influence is six or less, draw a card into your memory.",
+            dto.getEffectRaw()
+        );
+        assertEquals(
+            "A reward for agents of brilliant skill and service.",
+            dto.getFlavor()
+        );
+        assertNull(dto.getLegality());
+        assertNull(dto.getLevel());
+        assertNull(dto.getLife());
+        assertEquals("Insignia of the Corhazi", dto.getName());
+        assertNull(dto.getPower());
+        assertEquals(0, dto.getReferencedBy().size());
+        assertEquals(0, dto.getReferences().size());
+        assertEquals(0, dto.getRule().size());
+        assertNull(dto.getSpeed());
+        assertEquals("insignia-of-the-corhazi", dto.getSlug());
+        assertTrue(dto.getSubtypes().containsAll(List.of("ASSASSIN", "ARTIFACT")));
+        assertTrue(dto.getTypes().containsAll(List.of("REGALIA", "ITEM")));
+    }
+
+    void assertMerlinKingslayer(){
+        CardDTO dto = cardService.getCardById("rz1bqry41l").orElseThrow();
+        assertTrue(dto.getClasses().containsAll(Set.of("MAGE", "WARRIOR")));
+        assertEquals(3, dto.getCostMemory());
+        assertTrue(dto.getCostReserve() == null);
+        assertTrue(dto.getDurability() == null);
+        assertTrue(dto.getElements().contains("CRUX"));
+        assertEquals(
+            "**Merlin Lineage**\n\nAt the beginning of your recollection phase, put a **level** counter on CARDNAME. Then, if there's an even amount of **level** counters on CARDNAME, draw a card and CARDNAME's attacks get +2 [POWER] until end of turn.", 
+            dto.getEffect());
+        assertEquals(
+            "Merlin Lineage\n\nAt the beginning of your recollection phase, put a level counter on Merlin. Then, if there's an even amount of level counters on Merlin, draw a card and Merlin's attacks get +2 POWER until end of turn.",
+            dto.getEffectRaw()
+        );
+        assertNull(
+            dto.getFlavor()
+        );
+        assertNull(dto.getLegality());
+        assertEquals(3, dto.getLevel());
+        assertEquals(28, dto.getLife());
+        assertEquals("Merlin, Kingslayer", dto.getName());
+        assertNull(dto.getPower());
+        assertEquals(0, dto.getReferencedBy().size());
+        assertEquals(0, dto.getReferences().size());
+        assertEquals(0, dto.getRule().size());
+        assertNull(dto.getSpeed());
+        assertEquals("merlin-kingslayer", dto.getSlug());
+        assertTrue(dto.getSubtypes().containsAll(List.of("MAGE", "WARRIOR", "HUMAN")));
+        assertTrue(dto.getTypes().containsAll(List.of("CHAMPION")));
     }
 }

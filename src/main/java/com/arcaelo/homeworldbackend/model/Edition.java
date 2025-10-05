@@ -14,9 +14,13 @@ public class Edition {
     private Set<String> collaborators;
     private String collectorNumber;
     private String configuration;
+    @Column(columnDefinition = "text")
     private String effect;
+    @Column(columnDefinition = "text")
     private String effectHtml;
+    @Column(columnDefinition = "text")
     private String effectRaw;
+    @Column(columnDefinition = "text")
     private String flavor;
     private String illustrator;
     private String image;

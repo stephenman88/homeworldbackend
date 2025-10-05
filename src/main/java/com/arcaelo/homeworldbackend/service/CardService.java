@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CardService {
-    List<CardDTO> pullCards();
+    List<CardDTO> pullAllCards();
+    List<CardDTO> pullCards(Integer page);
     List<CardDTO> getAllCards();
     Optional<CardDTO> getCardById(String id);
     List<CardDTO> getCardsByParameter(

@@ -18,8 +18,11 @@ public class Card {
     @OneToMany(mappedBy="card", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Edition> editions;
     private Set<String> elements;
+    @Column(columnDefinition = "text")
     private String effect;
+    @Column(columnDefinition = "text")
     private String effectRaw;
+    @Column(columnDefinition = "text")
     private String flavor;
     private LocalDateTime lastUpdate;
     private HashMap<String, HashMap<String, Integer>> legality;

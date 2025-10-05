@@ -38,15 +38,37 @@ public class CardServiceImp implements CardService {
     EditionService editionService){
         this.cardRepository = cardRepository;
         this.cardMapper = cardMapper;
-        this.webClient = webClientBuilder.baseUrl(gaApiUrl).build();
+        this.webClient = webClientBuilder.baseUrl(gaApiUrl)
+            .codecs(configurer -> 
+                configurer.defaultCodecs().maxInMemorySize(1*1024*1024)
+            )
+            .build();
         this.editionService = editionService; 
     }
 
     @Transactional
     @Override
-    public List<CardDTO> pullCards() throws RuntimeException{
+    public List<CardDTO> pullAllCards() throws RuntimeException{
+        List<CardDTO> returnList = new ArrayList<CardDTO>();
+        int pageNumber = 1;
+        int resultCount = 0;
+        do{
+            List<CardDTO> pulledDTOs = pullCards(pageNumber);
+            resultCount = pulledDTOs.size();
+            returnList.addAll(pulledDTOs);
+            pageNumber++;
+        }while(resultCount > 0);
+        return returnList;
+    }
+
+    @Transactional
+    @Override
+    public List<CardDTO> pullCards(Integer page) throws RuntimeException{
         try{
-            JsonNode results = webClient.get().uri("/card/search").retrieve().bodyToMono(JsonNode.class).block();
+            JsonNode results = webClient.get().uri(
+                    uriBuilder -> uriBuilder.path("/card/search").queryParam("page", page).build()
+                )
+                .retrieve().bodyToMono(JsonNode.class).block();
             List<CardDTO> cardDTOs = new ArrayList<CardDTO>();
             HashMap<String, Set<String>> cardSetEditionIds = new HashMap<String, Set<String>>();
             for(JsonNode cardNode : results.path("data")){
@@ -56,7 +78,9 @@ public class CardServiceImp implements CardService {
                     if(cardSetEditionIds.containsKey(setNode.path("id").asText())){
                         cardSetEditionIds.get(setNode.path("id").asText()).add(editionNode.path("uuid").asText());
                     }else{
-                        cardSetEditionIds.put(setNode.path("id").asText(), Set.of(editionNode.path("uuid").asText()));
+                        HashSet<String> editionIds = new HashSet<String>();
+                        editionIds.add(editionNode.path("uuid").asText());
+                        cardSetEditionIds.put(setNode.path("id").asText(), editionIds);
                     }
                 }
             }

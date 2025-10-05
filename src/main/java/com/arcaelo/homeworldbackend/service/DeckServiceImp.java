@@ -41,7 +41,8 @@ public class DeckServiceImp implements DeckService{
     public DeckDTO updateDeck(Long id, DeckDTO deckDTO){
         Deck deck = deckRepository.findById(id).orElseThrow();
         deck.setPlayer(convertToEntity(deckDTO).getPlayer());
-        return convertToDTO(deck);
+        Deck updatedDeck = deckRepository.save(deck);
+        return convertToDTO(updatedDeck);
     }
 
     @Override
