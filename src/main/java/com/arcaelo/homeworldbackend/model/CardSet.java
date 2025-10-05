@@ -13,7 +13,7 @@ public class CardSet {
     private String name;
     private String prefix;
     private LocalDateTime releaseDate;
-    @OneToMany(mappedBy = "cardSet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cardSet", cascade = CascadeType.PERSIST)
     private List<Edition> cardEditions;
 
     public String getId(){return id;}

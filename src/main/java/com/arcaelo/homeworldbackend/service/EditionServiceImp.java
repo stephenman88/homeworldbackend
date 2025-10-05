@@ -4,7 +4,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.arcaelo.homeworldbackend.repo.EditionRepository;
-import com.arcaelo.homeworldbackend.model.CardSetDTO;
 import com.arcaelo.homeworldbackend.model.Edition;
 import com.arcaelo.homeworldbackend.model.EditionDTO;
 import com.arcaelo.homeworldbackend.model.EditionMapper;
@@ -37,17 +36,16 @@ public class EditionServiceImp implements EditionService{
             for(JsonNode cardData : gaApiCardList.path("data")){
                 JsonNode editionsList = cardData.path("editions");
                 for(JsonNode edition : editionsList){
-                    CardSetDTO cardSetDTO = cardSetService.extractCardSet(edition);
-                    System.out.println("Saved CardSet: " + cardSetDTO.getId());
+                    cardSetService.extractCardSet(edition);
                     EditionDTO dto = convertToDTO(edition);
                     allEditions.add(dto);
                 }
             }
+            if(allEditions.size() == 0) return null;
             System.out.println("allEditions size: " + allEditions.size());
             List<Edition> editions = allEditions.stream()
                 .map(dto -> convertToEntity(dto)).toList();
             List<Edition> savedEditions = editionRepository.saveAll(editions);
-            System.out.println("saved edition is" + savedEditions.get(0).getSlug());
             return savedEditions.stream().map(e -> convertToDTO(e)).toList();
         }catch(Exception e){
             System.out.println("extractEditions exception: " + e.getMessage());

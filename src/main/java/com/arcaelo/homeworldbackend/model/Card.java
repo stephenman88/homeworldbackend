@@ -15,7 +15,7 @@ public class Card {
     private Integer costMemory;
     private Integer costReserve;
     private Integer durability;
-    @OneToMany(mappedBy="card", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy="card", cascade = CascadeType.PERSIST)
     private List<Edition> editions;
     private Set<String> elements;
     @Column(columnDefinition = "text")
