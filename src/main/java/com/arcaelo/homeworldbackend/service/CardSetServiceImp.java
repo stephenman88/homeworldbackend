@@ -17,6 +17,8 @@ import java.util.Set;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CardSetServiceImp implements CardSetService{
     private final CardSetRepository cardSetRepository;
@@ -27,6 +29,7 @@ public class CardSetServiceImp implements CardSetService{
         this.cardSetMapper = cardSetMapper;
     }
 
+    @Transactional
     @Override
     public CardSetDTO extractCardSet(JsonNode editionNode){
         try{
@@ -42,6 +45,7 @@ public class CardSetServiceImp implements CardSetService{
         return null;
     }
 
+    @Transactional
     @Override
     public List<CardSetDTO> updateEditions(HashMap<String, Set<String>> cardSetIdEditionIdPairs){
         try{
@@ -66,16 +70,19 @@ public class CardSetServiceImp implements CardSetService{
         return null;
     }
 
+    @Transactional
     @Override 
     public List<CardSetDTO> getAllCardSets(){
         return cardSetRepository.findAll().stream().map(this::convertToDTO).toList();
     }
 
+    @Transactional
     @Override
     public Optional<CardSetDTO> getCardSetById(String id){
         return cardSetRepository.findById(id).map(this::convertToDTO);
     }
 
+    @Transactional
     @Override
     public CardSetDTO saveCardSet(CardSetDTO cardSetDTO){
         CardSet cardSet = convertToEntity(cardSetDTO);
@@ -83,6 +90,7 @@ public class CardSetServiceImp implements CardSetService{
         return convertToDTO(updatedCardSet);
     }
 
+    @Transactional
     @Override
     public CardSetDTO updateCardSet(String id, CardSetDTO cardSetDTO){
         CardSet temp = convertToEntity(cardSetDTO);
@@ -96,6 +104,7 @@ public class CardSetServiceImp implements CardSetService{
         return convertToDTO(cardSetRepository.save(cardSet));
     }
 
+    @Transactional
     @Override
     public void deleteCardSet(String id){
         cardSetRepository.deleteById(id);

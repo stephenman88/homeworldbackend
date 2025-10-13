@@ -1,11 +1,8 @@
 package com.arcaelo.homeworldbackend.unit;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.arcaelo.homeworldbackend.model.EditionMapper;
 import com.arcaelo.homeworldbackend.model.EditionMapperImpl;
@@ -13,8 +10,6 @@ import com.arcaelo.homeworldbackend.model.Card;
 import com.arcaelo.homeworldbackend.model.CardSet;
 import com.arcaelo.homeworldbackend.model.Edition;
 import com.arcaelo.homeworldbackend.model.EditionDTO;
-import com.arcaelo.homeworldbackend.repo.CardRepository;
-import com.arcaelo.homeworldbackend.repo.CardSetRepository;
 
 import java.util.Set;
 
@@ -22,24 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
-
-@JsonTest
 @Import(EditionMapperImpl.class)
 @TestPropertySource("classpath:env.properties")
 public class EditionMapperTests {
-    @Autowired
-    private EditionMapper editionMapper;
-
-    @MockitoBean
-    private CardRepository cardRepository;
-    @MockitoBean
-    private CardSetRepository cardSetRepository;
+    private final EditionMapper editionMapper = new EditionMapperImpl();
 
     @Test
     void testToDTO(){
         Edition edition = new Edition();
         edition.setUUID("test ed 1");
+        edition.setEffect("test regular effect");
+        edition.setEffectHtml("text html effect");
         edition.setCollaborators(Set.of("Hori", "Hanh Chu"));
         
         Card c1 = new Card();
@@ -53,7 +41,7 @@ public class EditionMapperTests {
         Card o2 = new Card();
         o2.setUUID("orientation 2");
         o2.setName("back");
-        edition.setOtherOrientation(List.of(o1, o2));
+        edition.setOtherOrientation(Set.of(o1, o2));
 
         CardSet cs = new CardSet();
         cs.setId("cardset1");
@@ -65,7 +53,7 @@ public class EditionMapperTests {
         assertEquals("test ed 1", dto.getUUID());
         assertTrue(dto.getCollaborators().containsAll(Set.of("Hori", "Hanh Chu")));
         assertEquals("card1", dto.getCardId());
-        assertEquals("orientation 2", dto.getOtherOrientationCardId().get(1));
+        assertTrue(dto.getOtherOrientationCardId().contains("orientation 2"));
         assertEquals("cardset1", dto.getCardSetId());
     }
 }

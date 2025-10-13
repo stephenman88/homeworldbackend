@@ -1,11 +1,8 @@
 package com.arcaelo.homeworldbackend.unit;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.arcaelo.homeworldbackend.model.Card;
 import com.arcaelo.homeworldbackend.model.CardDTO;
@@ -16,21 +13,19 @@ import com.arcaelo.homeworldbackend.repo.EditionRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 
 //@SpringBootTest for integration testing
-@JsonTest
 @TestPropertySource("classpath:env.properties")
 @Import(CardMapperImpl.class)
 public class CardMapperTests {
-    @Autowired
-    private CardMapper cardMapper;
+    private final CardMapper cardMapper = new CardMapperImpl();
 
-    @MockitoBean
-    private EditionRepository editionRepository;
+    private EditionRepository editionRepository = mock(EditionRepository.class);
 
     @Test
     void testToDTO(){
@@ -64,6 +59,7 @@ public class CardMapperTests {
 
         when(editionRepository.findById("edition 1")).thenReturn(Optional.of(edition));
 
+        cardMapper.setEditionRepository(editionRepository);
         Card card = cardMapper.toEntity(dto);
         assertNotNull(card);
         assertEquals(card.getUUID(), "card 1");

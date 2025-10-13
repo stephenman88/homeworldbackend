@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.util.Set;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.util.HashMap;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -15,7 +18,7 @@ public class Card {
     private Integer costMemory;
     private Integer costReserve;
     private Integer durability;
-    @OneToMany(mappedBy="card", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy="card", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Edition> editions;
     private Set<String> elements;
     @Column(columnDefinition = "text")
@@ -25,23 +28,47 @@ public class Card {
     @Column(columnDefinition = "text")
     private String flavor;
     private LocalDateTime lastUpdate;
+    @Column(columnDefinition = "jsonb")
+    @Convert(converter = JsonConverters.HashMapHashMapConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     private HashMap<String, HashMap<String, Integer>> legality;
     private Integer level;
     private Integer life;
     private String name;
     private Integer power;
-    @Column(name="card_referenced_by")
+    @Column(name="card_referenced_by", columnDefinition = "jsonb")
+    @Convert(converter = JsonConverters.HashMapListConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<HashMap<String, String>> referencedBy;
-    @Column(name="card_references")
+    @Column(name="card_references", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Convert(converter = JsonConverters.HashMapListConverter.class)
     private List<HashMap<String, String>> references;
-    @Column(name="card_rule")
+    @Column(name="card_rule", columnDefinition = "jsonb")
+    @Convert(converter = JsonConverters.HashMapSetConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     private Set<HashMap<String, String>> rule;
     private Boolean speed;
     private String slug;
+    @ElementCollection
     private Set<String> subtypes;
+    @ElementCollection
     private Set<String> types;
     @Id
     private String uuid;
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(!(o instanceof Card)) return false;
+        Card card = (Card) o;
+        return uuid != null && this.uuid.equals(card.getUUID());
+    }
+
+    @Override
+    public int hashCode(){
+        return uuid != null ? uuid.hashCode() : 0;
+    }
 
     public Set<String> getClasses(){return classes;}
     public void setClasses(Set<String> classes){this.classes = classes;}

@@ -3,6 +3,8 @@ package com.arcaelo.homeworldbackend.model;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.arcaelo.homeworldbackend.model.CardResponseDTO.EditionResponseDTO;
 import com.arcaelo.homeworldbackend.repo.EditionRepository;
 import java.util.ArrayList;
 import java.util.Set;
@@ -12,6 +14,10 @@ import java.util.HashSet;
 public abstract class CardSetMapper {
     @Autowired
     protected EditionRepository editionRepository;
+
+    public void setEditionRepository(EditionRepository editionRepository) {
+        this.editionRepository = editionRepository;
+    }
 
     @Mapping(source="cardEditions", target="cardEditionIds")
     public CardSetDTO toDTO(CardSet cardSet){
@@ -51,4 +57,6 @@ public abstract class CardSetMapper {
         cs.setCardEditions(editions);
         return cs;
     }
+
+    public abstract EditionResponseDTO.CardSetResponseDTO toResponseDTO(CardSet cardSet);
 }

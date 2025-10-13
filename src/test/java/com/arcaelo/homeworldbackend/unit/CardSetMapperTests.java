@@ -2,6 +2,7 @@ package com.arcaelo.homeworldbackend.unit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -10,11 +11,8 @@ import java.util.Set;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.arcaelo.homeworldbackend.model.CardSet;
 import com.arcaelo.homeworldbackend.model.CardSetDTO;
@@ -23,15 +21,12 @@ import com.arcaelo.homeworldbackend.model.CardSetMapperImpl;
 import com.arcaelo.homeworldbackend.model.Edition;
 import com.arcaelo.homeworldbackend.repo.EditionRepository;
 
-@JsonTest
 @TestPropertySource("classpath:env.properties")
 @Import(CardSetMapperImpl.class)
 public class CardSetMapperTests {
-    @Autowired
-    private CardSetMapper cardSetMapper;
+    private final CardSetMapper cardSetMapper = new CardSetMapperImpl();
 
-    @MockitoBean
-    private EditionRepository editionRepository;
+    private EditionRepository editionRepository = mock(EditionRepository.class);
 
     @Test
     void testToDTO(){
@@ -70,6 +65,7 @@ public class CardSetMapperTests {
         when(editionRepository.findById("alter")).thenReturn(Optional.of(ed2));
         when(editionRepository.findById("1st ed")).thenReturn(Optional.of(ed1));
 
+        cardSetMapper.setEditionRepository(editionRepository);
         CardSet set = cardSetMapper.toEntity(dto);
         assertNotNull(set);
         assertEquals("set1", set.getId());

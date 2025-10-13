@@ -11,10 +11,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.transaction.Transactional;
 
 import com.arcaelo.homeworldbackend.model.CardMapper;
+import com.arcaelo.homeworldbackend.model.CardResponseDTO;
+import com.arcaelo.homeworldbackend.model.Edition;
 import com.arcaelo.homeworldbackend.model.CardDTO;
 import com.arcaelo.homeworldbackend.model.Card;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -35,15 +38,15 @@ public class CardServiceImp implements CardService {
     CardMapper cardMapper,
     WebClient.Builder webClientBuilder,
     @Value("${gaApiUrl}") String gaApiUrl,
-    EditionService editionService){
+    @Lazy EditionService editionService){
         this.cardRepository = cardRepository;
         this.cardMapper = cardMapper;
         this.webClient = webClientBuilder.baseUrl(gaApiUrl)
             .codecs(configurer -> 
-                configurer.defaultCodecs().maxInMemorySize(1*1024*1024)
+                configurer.defaultCodecs().maxInMemorySize(4*1024*1024)
             )
             .build();
-        this.editionService = editionService; 
+        this.editionService = editionService;
     }
 
     @Transactional
@@ -70,9 +73,12 @@ public class CardServiceImp implements CardService {
                 )
                 .retrieve().bodyToMono(JsonNode.class).block();
             List<CardDTO> cardDTOs = new ArrayList<CardDTO>();
+            HashMap<String, CardDTO> idDTOMap = new HashMap<String, CardDTO>();
             HashMap<String, Set<String>> cardSetEditionIds = new HashMap<String, Set<String>>();
             for(JsonNode cardNode : results.path("data")){
-                cardDTOs.add(convertToDTO(cardNode));
+                CardDTO dto = convertToDTO(cardNode);
+                cardDTOs.add(dto);
+                idDTOMap.put(dto.getUUID(), dto);
                 for(JsonNode editionNode : cardNode.path("editions")){
                     JsonNode setNode = editionNode.path("set");
                     if(cardSetEditionIds.containsKey(setNode.path("id").asText())){
@@ -82,10 +88,23 @@ public class CardServiceImp implements CardService {
                         editionIds.add(editionNode.path("uuid").asText());
                         cardSetEditionIds.put(setNode.path("id").asText(), editionIds);
                     }
+
+                    for(JsonNode otherOrientationNode : editionNode.path("other_orientations")){
+                        String oouuid = otherOrientationNode.path("uuid").asText();
+                        if(idDTOMap.containsKey(oouuid)){
+                            idDTOMap.get(oouuid).getEditionIds().add(otherOrientationNode.path("edition").path("uuid").asText());
+                        }else{
+                            CardDTO oo = convertToDTO(otherOrientationNode);
+                            cardDTOs.add(oo);
+                            idDTOMap.put(oo.getUUID(), oo);
+                        }
+                    }
                 }
             }
             List<Card> cards = cardDTOs.stream()
-                .map(dto -> {return convertToEntity(dto);}).toList();
+                .map(dto -> {
+                    return convertToEntity(dto);}).toList();
+            
             List<Card> savedCards = cardRepository.saveAll(cards);
             List<CardDTO> savedCardDTOs = savedCards.stream()
                 .map(c -> convertToDTO(c)).toList();
@@ -98,6 +117,7 @@ public class CardServiceImp implements CardService {
         }
     }
 
+    @Transactional
     @Override
     public List<CardDTO> getAllCards(){
         return cardRepository.findAll().stream().map(this::convertToDTO).toList();
@@ -105,9 +125,86 @@ public class CardServiceImp implements CardService {
 
     @Transactional
     @Override
+    public List<CardResponseDTO> getAllCardResponses(){
+        return cardRepository.findAll().stream().map(this::convertToResponseDTO).toList();
+    }
+
+    @Transactional
+    @Override
     public Optional<CardDTO> getCardById(String id){
         return cardRepository.findById(id).map(this::convertToDTO);
     }
+
+    @Transactional
+    @Override
+    public Optional<CardResponseDTO> getCardResponseById(String id){
+        return cardRepository.findById(id).map(this::convertToResponseDTO);
+    }
+
+    @Transactional
+    @Override
+    public List<CardResponseDTO> getCardResponsesByParameter(
+        List<String> cardClass,
+        String costMemoryOperator,
+        Integer costMemory,
+        String costReserveOperator,
+        Integer costReserve,
+        String durabilityOperator,
+        Integer durability,
+        String effectPart,
+        List<String> rarities,
+        List<String> cardSetIds,
+        String themaCharmOperator,
+        Integer themaCharm,
+        String themaFerocityOperator,
+        Integer themaFerocity,
+        String themaGraceOperator,
+        Integer themaGrace,
+        String themaMystiqueOperator,
+        Integer themaMystique,
+        String themaSumOperator,
+        Integer themaSum,
+        String themaValorOperator,
+        Integer themaValor,
+        List<String> elements,
+        String flavor,
+        String legalityFormat,
+        String limitOperator,
+        Integer limit,
+        String levelOperator,
+        Integer level,
+        String lifeOperator,
+        Integer life,
+        String namePart,
+        String powerOperator,
+        Integer power,
+        Boolean speed,
+        String slug,
+        List<String> subtypes,
+        List<String> types,
+        String id
+    ){
+        Specification<Card> specs = Specification.allOf(
+            CardSpecHelper.hasCardClasses(cardClass),
+            CardSpecHelper.processInteger(costMemoryOperator, costMemory, CardSpecHelper.FIELDS.INTEGER.COST_MEMORY),
+            CardSpecHelper.processInteger(costReserveOperator, costReserve, CardSpecHelper.FIELDS.INTEGER.COST_RESERVE),
+            CardSpecHelper.processInteger(durabilityOperator, durability, CardSpecHelper.FIELDS.INTEGER.DURABILITY),
+            CardSpecHelper.containsText(effectPart, CardSpecHelper.FIELDS.STRING.EFFECT),
+            CardSpecHelper.hasElements(elements),
+            CardSpecHelper.containsText(flavor, CardSpecHelper.FIELDS.STRING.FLAVOR),
+            CardSpecHelper.processInteger(levelOperator, level, CardSpecHelper.FIELDS.INTEGER.LEVEL),
+            CardSpecHelper.containsText(namePart, CardSpecHelper.FIELDS.STRING.NAME),
+            CardSpecHelper.processInteger(powerOperator, power, CardSpecHelper.FIELDS.INTEGER.POWER),
+            CardSpecHelper.isFast(speed),
+            CardSpecHelper.containsText(slug, CardSpecHelper.FIELDS.STRING.SLUG),
+            CardSpecHelper.hasSubtypes(subtypes),
+            CardSpecHelper.hasTypes(types)
+        );
+
+        List<CardResponseDTO> returnDTOs = cardRepository.findAll(specs)
+            .stream().map(this::convertToResponseDTO).toList();
+        return returnDTOs;
+    };
 
     @Transactional
     @Override
@@ -174,12 +271,14 @@ public class CardServiceImp implements CardService {
         return returnDTOs;
     };
 
+    @Transactional
     @Override
     public CardDTO saveCard(CardDTO cardDTO){
         Card card = convertToEntity(cardDTO);
         return convertToDTO(cardRepository.save(card));
     }
 
+    @Transactional
     @Override
     public CardDTO updateCard(String id, CardDTO cardDTO){
         Card card = cardRepository.findById(id).orElseThrow();
@@ -208,6 +307,7 @@ public class CardServiceImp implements CardService {
         return convertToDTO(cardRepository.save(card));
     }
 
+    @Transactional
     @Override
     public void deleteCard(String id){
         cardRepository.deleteById(id);
@@ -217,11 +317,27 @@ public class CardServiceImp implements CardService {
         return cardMapper.toDTO(card);
     }
 
+    private CardResponseDTO convertToResponseDTO(Card card){
+        return cardMapper.toResponseDTO(card);
+    }
+
     private Card convertToEntity(CardDTO cardDTO){
         return cardMapper.toEntity(cardDTO);
     }
 
-    private CardDTO convertToDTO(JsonNode cardNode) throws JsonProcessingException{
+    @Override
+    public void addOtherOrientationToEdition(JsonNode otherOrientation, Edition edition) throws JsonProcessingException{
+        CardDTO cardDTO = convertToDTO(otherOrientation);
+        Card card = cardRepository.findById(cardDTO.getUUID()).orElse(convertToEntity(cardDTO));
+        Set<Card> oo = new HashSet<Card>();
+        if(edition.getOtherOrientation() == null){
+            edition.setOtherOrientation(oo);
+        }
+        edition.getOtherOrientation().add(card);
+    }
+
+    @Override
+    public CardDTO convertToDTO(JsonNode cardNode) throws JsonProcessingException{
             JsonNode node = cardNode;
             CardDTO dto = new CardDTO();
             dto.setUUID(node.path("uuid").asText());
@@ -234,11 +350,16 @@ public class CardServiceImp implements CardService {
             dto.setCostMemory(node.path("cost_memory").isNull() ? null : node.path("cost_memory").numberValue().intValue());
             dto.setCostReserve(node.path("cost_reserve").isNull() ? null : node.path("cost_reserve").numberValue().intValue());
             dto.setDurability(node.path("durability").isNull() ? null : node.path("durability").numberValue().intValue());
-            
+
             ArrayList<String> editionIds = new ArrayList<String>();
-            for(int c = 0; node.path("editions").get(c) != null; c++){
-                editionIds.add(node.path("editions").path(c).path("uuid").asText());
+            if(node.get("editions") != null){
+                for(int c = 0; node.path("editions").get(c) != null; c++){
+                    editionIds.add(node.path("editions").path(c).path("uuid").asText());
+                }
+            }else if(node.get("edition") != null){
+                editionIds.add(node.path("edition").path("uuid").asText());
             }
+            
             dto.setEditionIds(editionIds);
 
             HashSet<String> elements= new HashSet<String>();
@@ -272,10 +393,10 @@ public class CardServiceImp implements CardService {
             List<HashMap<String, String>> referenceList = new ArrayList<HashMap<String, String>>();
             for(int c = 0; node.path("references").get(c) != null; c++){
                 HashMap<String, String> references = new HashMap<String, String>();
-                references.put("direction", node.path("references").path("direction").asText());
-                references.put("kind", node.path("references").path("kind").asText());
-                references.put("name", node.path("references").path("name").asText());
-                references.put("slug", node.path("references").path("slug").asText());
+                references.put("direction", node.path("references").path(c).path("direction").asText());
+                references.put("kind", node.path("references").path(c).path("kind").asText());
+                references.put("name", node.path("references").path(c).path("name").asText());
+                references.put("slug", node.path("references").path(c).path("slug").asText());
                 referenceList.add(references);
             }
             
@@ -285,8 +406,8 @@ public class CardServiceImp implements CardService {
             for(int c = 0; node.path("rule").get(c) != null; c++){
                 HashMap<String, String> rule = new HashMap<String, String>();
                 rule.put("date_added", node.path("rule").path(c).path("date_added").asText());
-                rule.put("description", node.path("description").path(c).path("description").asText());
-                rule.put("title", node.path("title").path(c).path("title").asText());
+                rule.put("description", node.path("rule").path(c).path("description").asText());
+                rule.put("title", node.path("rule").path(c).path("title").asText());
                 rules.add(rule);
             }
             dto.setRule(rules);
@@ -348,8 +469,7 @@ public class CardServiceImp implements CardService {
             dto.setPower(node.path("power").isNumber() ? node.path("power").intValue() : null);
 
             List<HashMap<String, String>> referencedBy = new ArrayList<HashMap<String, String>>();
-            for(int c = 0; node.path("referenced_by").get(c) != null; c++){
-                JsonNode rbNode = node.path("referenced_by").path(c);
+            for(JsonNode rbNode : node.path("referenced_by")){
                 HashMap<String, String> rb = new HashMap<String, String>();
 
                 rb.put("direction", rbNode.path("direction").asText());
@@ -361,12 +481,12 @@ public class CardServiceImp implements CardService {
             dto.setReferencedBy(referencedBy);
 
             List<HashMap<String, String>> referenceList = new ArrayList<HashMap<String, String>>();
-            for(int c = 0; node.path("references").get(c) != null; c++){
+            for(JsonNode rNode : node.path("references")){
                 HashMap<String, String> references = new HashMap<String, String>();
-                references.put("direction", node.path("references").path("direction").asText());
-                references.put("kind", node.path("references").path("kind").asText());
-                references.put("name", node.path("references").path("name").asText());
-                references.put("slug", node.path("references").path("slug").asText());
+                references.put("direction", rNode.path("direction").asText());
+                references.put("kind", rNode.path("kind").asText());
+                references.put("name", rNode.path("name").asText());
+                references.put("slug", rNode.path("slug").asText());
                 referenceList.add(references);
             }
             
@@ -376,8 +496,8 @@ public class CardServiceImp implements CardService {
             for(int c = 0; node.path("rule").get(c) != null; c++){
                 HashMap<String, String> rule = new HashMap<String, String>();
                 rule.put("date_added", node.path("rule").path(c).path("date_added").asText());
-                rule.put("description", node.path("description").path(c).path("description").asText());
-                rule.put("title", node.path("title").path(c).path("title").asText());
+                rule.put("description", node.path("rule").path(c).path("description").asText());
+                rule.put("title", node.path("rule").path(c).path("title").asText());
                 rules.add(rule);
             }
             dto.setRule(rules);

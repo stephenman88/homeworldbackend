@@ -3,14 +3,14 @@ package com.arcaelo.homeworldbackend.model;
 import jakarta.persistence.*;
 
 import java.util.Set;
-import java.util.List;
 
 @Entity
 @Table(name = "editions")
 public class Edition {
-    @ManyToOne
-    @JoinColumn(name = "card_id", referencedColumnName = "uuid")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "card_id", referencedColumnName = "uuid", nullable = false)
     private Card card;
+    @ElementCollection
     private Set<String> collaborators;
     private String collectorNumber;
     private String configuration;
@@ -25,9 +25,13 @@ public class Edition {
     private String illustrator;
     private String image;
     private String orientation;
-    @OneToMany
-    private List<Card> otherOrientation; 
-    private Integer rarity;//start here
+    @ManyToMany
+    @JoinTable(name="edition_orientation_links",
+    joinColumns = @JoinColumn(name="edition_id"),
+    inverseJoinColumns = @JoinColumn(name="card_id", referencedColumnName = "uuid"),
+    uniqueConstraints = @UniqueConstraint(columnNames = {"edition_id", "card_id"}))
+    private Set<Card> otherOrientation;
+    private Integer rarity;
     private String slug;
     @ManyToOne
     @JoinColumn(name = "cardset_id", referencedColumnName = "id")
@@ -46,6 +50,8 @@ public class Edition {
     private Integer themaValorNonfoil;
     @Id
     private String uuid;
+    @ElementCollection
+    private Set<String> otherOrientationEditionIds;
 
     public Card getCard(){return card;}
     public void setCard(Card card){this.card = card;}
@@ -58,7 +64,7 @@ public class Edition {
     public String getEffect(){return effect;}
     public void setEffect(String effect){this.effect = effect;}
     public String getEffectHtml(){return effectHtml;}
-    public void setEffectHtml(String effectHtml){this.effect = effectHtml;}
+    public void setEffectHtml(String effectHtml){this.effectHtml = effectHtml;}
     public String getEffectRaw(){return effectRaw;}
     public void setEffectRaw(String effectRaw){this.effectRaw = effectRaw;}
     public String getFlavor(){return flavor;}
@@ -68,9 +74,9 @@ public class Edition {
     public String getImage(){return image;}
     public void setImage(String image){this.image = image;}
     public String getOrientation(){return orientation;}
-    public void setOrientation(String orientation){this.orientation = orientation;}
-    public List<Card> getOtherOrientation(){return otherOrientation;}
-    public void setOtherOrientation(List<Card> otherOrientation){this.otherOrientation = otherOrientation;}
+    public void setOrientation(String orientation){this.orientation = orientation;};
+    public Set<Card> getOtherOrientation(){return otherOrientation;}
+    public void setOtherOrientation(Set<Card> otherOrientation){this.otherOrientation = otherOrientation;}
     public Integer getRarity(){return rarity;}
     public void setRarity(Integer rarity){this.rarity = rarity;}
     public String getSlug(){return slug;}
@@ -103,5 +109,6 @@ public class Edition {
     public void setThemaValorNonfoil(Integer themaValorNonfoil){this.themaValorNonfoil = themaValorNonfoil;}
     public String getUUID(){return uuid;}
     public void setUUID(String uuid){this.uuid = uuid;}
-
+    public Set<String> getOtherOrientationEditionIds(){return otherOrientationEditionIds;}
+    public void setOtherOrientationEditionIds(Set<String> otherOrientationEditionIds){this.otherOrientationEditionIds = otherOrientationEditionIds;}
 }

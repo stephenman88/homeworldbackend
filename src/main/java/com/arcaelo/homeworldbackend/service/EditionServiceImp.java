@@ -1,5 +1,6 @@
 package com.arcaelo.homeworldbackend.service;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,8 @@ import com.arcaelo.homeworldbackend.model.EditionMapper;
 import com.arcaelo.homeworldbackend.repo.EditionSpecHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,30 +25,54 @@ public class EditionServiceImp implements EditionService{
     private final EditionRepository editionRepository;
     private final EditionMapper editionMapper;
     private final CardSetService cardSetService;
+    private final CardService cardService;
 
-    public EditionServiceImp(EditionRepository editionRepository, EditionMapper editionMapper, CardSetService cardSetService){
+    public EditionServiceImp(EditionRepository editionRepository, EditionMapper editionMapper, CardSetService cardSetService, @Lazy CardService cardService){
         this.editionMapper = editionMapper;
         this.editionRepository = editionRepository;
         this.cardSetService = cardSetService;
+        this.cardService = cardService;
     }
 
+    @Transactional
     @Override
     public List<EditionDTO> extractEditions(JsonNode gaApiCardList){
         try{
-            List<EditionDTO> allEditions = new ArrayList<EditionDTO>();
+
+            List<Edition> allEditions = new ArrayList<Edition>();
             for(JsonNode cardData : gaApiCardList.path("data")){
                 JsonNode editionsList = cardData.path("editions");
                 for(JsonNode edition : editionsList){
                     cardSetService.extractCardSet(edition);
                     EditionDTO dto = convertToDTO(edition);
-                    allEditions.add(dto);
+                    Edition entity = convertToEntity(dto);
+                    
+                    for(JsonNode ooNode : edition.path("other_orientations")){
+                        cardService.addOtherOrientationToEdition(ooNode, entity);
+                        JsonNode innerEditionNode = ooNode.path("edition");
+                        cardSetService.extractCardSet(innerEditionNode);
+                        EditionDTO innerEditionDTO = convertToDTO(innerEditionNode);
+                        Edition innerEditionEntity = convertToEntity(innerEditionDTO);
+                        allEditions.add(innerEditionEntity);
+
+                        Set<String> ooEditionIds;
+                        if(entity.getOtherOrientationEditionIds() == null){
+                            ooEditionIds = new HashSet<String>();
+                            entity.setOtherOrientationEditionIds(ooEditionIds);
+                        }else{
+                            ooEditionIds = entity.getOtherOrientationEditionIds();
+                        }
+                        ooEditionIds.add(innerEditionEntity.getUUID());
+                    }
+
+                    System.out.println("EditionServiceImp line 63: other orientation size is "+ entity.getOtherOrientation().size());
+                    allEditions.add(entity);
                 }
             }
             if(allEditions.size() == 0) return null;
-            System.out.println("allEditions size: " + allEditions.size());
-            List<Edition> editions = allEditions.stream()
-                .map(dto -> convertToEntity(dto)).toList();
-            List<Edition> savedEditions = editionRepository.saveAll(editions);
+            
+            List<Edition> savedEditions = editionRepository.saveAll(allEditions);
+
             return savedEditions.stream().map(e -> convertToDTO(e)).toList();
         }catch(Exception e){
             System.out.println("extractEditions exception: " + e.getMessage());
@@ -53,6 +80,7 @@ public class EditionServiceImp implements EditionService{
         return null;
     }
 
+    @Transactional
     @Override
     public List<EditionDTO> getAllEditions(){
         return editionRepository.findAll().stream()
@@ -60,11 +88,13 @@ public class EditionServiceImp implements EditionService{
             .toList();
     }
 
+    @Transactional
     @Override
     public Optional<EditionDTO> getEditionById(String id){
         return editionRepository.findById(id).map(this::convertToDTO);
     }
 
+    @Transactional
     @Override
     public List<EditionDTO> getEditionsByIds(List<String> ids){
         return editionRepository.findAllById(ids).stream()
@@ -72,6 +102,7 @@ public class EditionServiceImp implements EditionService{
             .toList();
     }
 
+    @Transactional
     @Override
     public List<EditionDTO> getEditionsByParameters(
         String cardId,
@@ -130,11 +161,13 @@ public class EditionServiceImp implements EditionService{
         .map(this::convertToDTO).toList();
     }
 
+    @Transactional
     @Override
     public void saveEdition(EditionDTO editionDTO){
         editionRepository.save(convertToEntity(editionDTO));
     }
 
+    @Transactional
     @Override
     public void updateEdition(String id, EditionDTO editionDTO){
         Edition og = editionRepository.findById(id).orElseThrow();
@@ -170,6 +203,7 @@ public class EditionServiceImp implements EditionService{
         editionRepository.save(og);
     }
 
+    @Transactional
     @Override
     public void deleteEdition(String id){
         editionRepository.deleteById(id);
@@ -193,18 +227,15 @@ public class EditionServiceImp implements EditionService{
         dto.setCollaborators(collabs);
         dto.setCollectorNumber(jsonNode.path("collector_number").asText());
         dto.setConfiguration(jsonNode.path("configuration").asText());
-        dto.setEffect(jsonNode.path("effect").isNull() ? null : jsonNode.path("effect").asText());
-        dto.setEffectHtml(jsonNode.path("effect_html").isNull() ? null : jsonNode.path("effect_html").asText());
+        dto.setEffect(jsonNode.path("effect").isTextual() ? jsonNode.path("effect").asText() : null);
+        dto.setEffectHtml(jsonNode.path("effect_html").isTextual() ? jsonNode.path("effect_html").asText() : null);
         dto.setEffectRaw(jsonNode.path("effect_raw").isNull() ? null : jsonNode.path("effect_raw").asText());
         dto.setFlavor(jsonNode.path("flavor").isNull() ? null : jsonNode.path("flavor").asText());
         dto.setIllustrator(jsonNode.path("illustrator").isNull() ? null : jsonNode.path("illustrator").asText());
         dto.setImage(jsonNode.path("image").asText());
         
         dto.setOrientation(jsonNode.path("orientation").isNull() ? null : jsonNode.path("orientation").asText());
-        List<String> otherOrientationIds = new ArrayList<String>();
-        for(JsonNode orientation : jsonNode.path("other_orientations")){
-            otherOrientationIds.add(orientation.path("uuid").asText());
-        }
+        Set<String> otherOrientationIds = new HashSet<String>();
         dto.setOtherOrientationCardId(otherOrientationIds);
         dto.setRarity(jsonNode.path("rarity").intValue());
         dto.setSlug(jsonNode.path("slug").asText());

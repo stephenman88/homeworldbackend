@@ -3,10 +3,12 @@ package com.arcaelo.homeworldbackend.service;
 import java.util.List;
 import java.util.Set;
 import java.util.Optional;
+
 import com.arcaelo.homeworldbackend.model.EditionDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface EditionService {
+
     List<EditionDTO> extractEditions(JsonNode gaApiCardList);
     List<EditionDTO> getAllEditions();
     Optional<EditionDTO> getEditionById(String id);

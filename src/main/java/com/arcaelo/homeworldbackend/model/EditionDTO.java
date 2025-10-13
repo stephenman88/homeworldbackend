@@ -1,8 +1,7 @@
 package com.arcaelo.homeworldbackend.model;
 
-import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class EditionDTO {
     private String cardId;
@@ -16,7 +15,7 @@ public class EditionDTO {
     private String illustrator;
     private String image;
     private String orientation;
-    private List<String> otherOrientationCardId;
+    private Set<String> otherOrientationCardId;
     private Integer rarity;
     private String slug;
     private String cardSetId;
@@ -33,6 +32,7 @@ public class EditionDTO {
     private Integer themaMystiqueNonfoil;
     private Integer themaValorNonfoil;
     private String uuid;
+    private Set<String> otherOrientationEditionIds;
 
     public String getCardId(){return cardId;}
     public void setCardId(String cardId){this.cardId = cardId;}
@@ -45,7 +45,7 @@ public class EditionDTO {
     public String getEffect(){return effect;}
     public void setEffect(String effect){this.effect = effect;}
     public String getEffectHtml(){return effectHtml;}
-    public void setEffectHtml(String effectHtml){this.effect = effectHtml;}
+    public void setEffectHtml(String effectHtml){this.effectHtml = effectHtml;}
     public String getEffectRaw(){return effectRaw;}
     public void setEffectRaw(String effectRaw){this.effectRaw = effectRaw;}
     public String getFlavor(){return flavor;}
@@ -56,11 +56,11 @@ public class EditionDTO {
     public void setImage(String image){this.image = image;}
     public String getOrientation(){return orientation;}
     public void setOrientation(String orientation){this.orientation = orientation;}
-    public List<String> getOtherOrientationCardId(){return otherOrientationCardId;}
-    public void setOtherOrientationCardId(List<String> otherOrientationCardId){this.otherOrientationCardId = otherOrientationCardId;}
+    public Set<String> getOtherOrientationCardId(){return otherOrientationCardId;}
+    public void setOtherOrientationCardId(Set<String> otherOrientationCardId){this.otherOrientationCardId = otherOrientationCardId;}
     public void setOtherOrientationCardId(String otherOrientationCardId)
     {
-        List<String> list = new ArrayList<String>();
+        Set<String> list = new HashSet<String>();
         list.add(otherOrientationCardId);
         this.otherOrientationCardId = list;}
     public Integer getRarity(){return rarity;}
@@ -95,4 +95,7 @@ public class EditionDTO {
     public void setThemaValorNonfoil(Integer themaValorNonfoil){this.themaValorNonfoil = themaValorNonfoil;}
     public String getUUID(){return uuid;}
     public void setUUID(String uuid){this.uuid = uuid;}
+    
+    public Set<String> getOtherOrientationEditionIds(){return otherOrientationEditionIds;}
+    public void setOtherOrientationEditionIds(Set<String> otherOrientationEditionIds){this.otherOrientationEditionIds = otherOrientationEditionIds;}
 }
