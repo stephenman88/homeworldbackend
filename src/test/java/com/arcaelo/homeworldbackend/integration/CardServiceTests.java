@@ -43,7 +43,7 @@ public class CardServiceTests extends WireMockIntBase{
     void setupStub() throws IOException{
         wireMockServer.resetAll();
         String mockResponsePage1 = Files.readString(Paths.get("src\\test\\java\\com\\arcaelo\\homeworldbackend\\resources\\MockResponsePage1.json"));
-        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/cards/search"))
             .withQueryParam("page", WireMock.equalTo("1"))
             .willReturn(WireMock.aResponse()
             .withHeader("Content-Type", "application/json")
@@ -55,7 +55,7 @@ public class CardServiceTests extends WireMockIntBase{
         String mockResponsePage2 = Files.readString(
             Paths.get("src\\test\\java\\com\\arcaelo\\homeworldbackend\\resources\\MockResponsePage2.json")
         );
-        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/cards/search"))
             .withQueryParam("page", WireMock.equalTo("2"))
             .willReturn(WireMock.aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -67,7 +67,7 @@ public class CardServiceTests extends WireMockIntBase{
         String mockResponsePage3 = Files.readString(
             Paths.get("src\\test\\java\\com\\arcaelo\\homeworldbackend\\resources\\MockResponsePageEmpty.json")
         );
-        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/card/search"))
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/cards/search"))
             .withQueryParam("page", WireMock.equalTo("3"))
             .willReturn(WireMock.aResponse()
                 .withHeader("Content-Type", "application/json")

@@ -69,7 +69,7 @@ public class CardServiceImp implements CardService {
     public List<CardDTO> pullCards(Integer page) throws RuntimeException{
         try{
             JsonNode results = webClient.get().uri(
-                    uriBuilder -> uriBuilder.path("/card/search").queryParam("page", page).build()
+                    uriBuilder -> uriBuilder.path("/cards/search").queryParam("page", page).build()
                 )
                 .retrieve().bodyToMono(JsonNode.class).block();
             List<CardDTO> cardDTOs = new ArrayList<CardDTO>();
@@ -175,7 +175,7 @@ public class CardServiceImp implements CardService {
         Integer level,
         String lifeOperator,
         Integer life,
-        String namePart,
+        String name,
         String powerOperator,
         Integer power,
         Boolean speed,
@@ -193,8 +193,9 @@ public class CardServiceImp implements CardService {
             CardSpecHelper.hasElements(elements),
             CardSpecHelper.containsText(flavor, CardSpecHelper.FIELDS.STRING.FLAVOR),
             CardSpecHelper.processInteger(levelOperator, level, CardSpecHelper.FIELDS.INTEGER.LEVEL),
-            CardSpecHelper.containsText(namePart, CardSpecHelper.FIELDS.STRING.NAME),
+            CardSpecHelper.containsText(name, CardSpecHelper.FIELDS.STRING.NAME),
             CardSpecHelper.processInteger(powerOperator, power, CardSpecHelper.FIELDS.INTEGER.POWER),
+            CardSpecHelper.processInteger(lifeOperator, life, CardSpecHelper.FIELDS.INTEGER.LIFE),
             CardSpecHelper.isFast(speed),
             CardSpecHelper.containsText(slug, CardSpecHelper.FIELDS.STRING.SLUG),
             CardSpecHelper.hasSubtypes(subtypes),

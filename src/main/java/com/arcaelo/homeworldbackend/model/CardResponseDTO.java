@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
 public class CardResponseDTO {
     private Set<String> classes;
     private Integer costMemory;
@@ -28,6 +31,7 @@ public class CardResponseDTO {
     private Set<String> subtypes;
     private Set<String> types;
     private String uuid;
+    @JsonProperty("editions")
     private List<EditionResponseDTO> editionResponseDTOs;
 
     public static class EditionResponseDTO{
@@ -45,6 +49,7 @@ public class CardResponseDTO {
         private List<OrientationDTO> otherOrientation;
         private Integer rarity;
         private String slug;
+        @JsonProperty("set")
         private CardSetResponseDTO cardSet;
         private Integer themaCharmFoil;
         private Integer themaFerocityFoil;
@@ -70,6 +75,7 @@ public class CardResponseDTO {
             private String effectRaw;
             private String flavor;
             private String editionId;
+            @JsonProperty("edition")
             private InnerEditionResponseDTO editionResponseDTO;
             private Integer level;
             private Integer life;
@@ -95,6 +101,7 @@ public class CardResponseDTO {
                 private String orientation;
                 private Integer rarity;
                 private String slug;
+                @JsonProperty("set")
                 private CardSetResponseDTO cardSet;
                 private Integer themaCharmFoil;
                 private Integer themaFerocityFoil;

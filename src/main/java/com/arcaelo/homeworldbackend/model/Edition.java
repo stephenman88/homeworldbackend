@@ -10,7 +10,6 @@ public class Edition {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", referencedColumnName = "uuid", nullable = false)
     private Card card;
-    @ElementCollection
     private Set<String> collaborators;
     private String collectorNumber;
     private String configuration;

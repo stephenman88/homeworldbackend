@@ -3,7 +3,8 @@ package com.arcaelo.homeworldbackend.repo;
 import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 import com.arcaelo.homeworldbackend.model.Card;
-import jakarta.persistence.criteria.Predicate;
+
+import jakarta.persistence.criteria.Join;
 
 public class CardSpecHelper {
     public static class FIELDS{
@@ -31,11 +32,9 @@ public class CardSpecHelper {
         return (root, query, criteriaBuilder) -> {
             if(cardClasses == null || cardClasses.isEmpty()) return null;
 
-            Predicate[] predicates = cardClasses.stream()
-                .map(c -> criteriaBuilder.isMember(c, root.get("classes")))
-                .toArray(Predicate[]::new);
+            Join<Card, String> classJoin = root.joinSet("classes");
 
-            return criteriaBuilder.or(predicates);
+            return classJoin.in(cardClasses.stream().map(c -> c.toUpperCase()).toList());
         };
     }
 
@@ -63,11 +62,9 @@ public class CardSpecHelper {
         return (root, query, criteriaBuilder) -> {
             if(elements == null || elements.isEmpty()){return null;}
 
-            Predicate[] predicates = elements.stream()
-                .map(e -> criteriaBuilder.isMember(e, root.get("elements")))
-                .toArray(Predicate[]::new);
-            
-            return criteriaBuilder.or(predicates);
+            Join<Card, String> elementJoin = root.joinSet("elements");
+
+            return elementJoin.in(elements.stream().map(e -> e.toUpperCase()).toList());
         };
     }
 
@@ -75,7 +72,7 @@ public class CardSpecHelper {
         return(root, query, criteriaBuilder) -> {
             if(searchText == null || searchText.isEmpty()) return null;
 
-            return criteriaBuilder.like(root.get(fieldName), "%" + searchText + "%");
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get(fieldName)), "%" + searchText.toLowerCase() + "%");
         };
     }
 
@@ -83,7 +80,7 @@ public class CardSpecHelper {
         return(root, query, criteriaBuilder) -> {
             if(searchText == null || searchText.isEmpty()) return null;
 
-            return criteriaBuilder.notLike(root.get(fieldName), "%" + searchText + "%");
+            return criteriaBuilder.notLike(criteriaBuilder.lower(root.get(fieldName)), "%" + searchText.toLowerCase() + "%");
         };
     }
 
@@ -101,12 +98,10 @@ public class CardSpecHelper {
     public static Specification<Card> hasSubtypes(List<String> subtypes){
         return(root,query, criteriaBuilder) -> {
             if(subtypes == null || subtypes.isEmpty())return null;
-
-            Predicate[] predicates = subtypes.stream()
-                .map(subtype -> criteriaBuilder.isMember(subtype, root.get("subtypes")))
-                .toArray(Predicate[]::new);
             
-            return criteriaBuilder.or(predicates);
+            Join<Card, String> subtypesJoin = root.joinSet("subtypes");
+            
+            return subtypesJoin.in(subtypes.stream().map(s -> s.toUpperCase()).toList());
         };
     }
 
@@ -114,11 +109,9 @@ public class CardSpecHelper {
         return(root, query, criteriaBuilder) -> {
             if(types == null || types.isEmpty()) return null;
 
-            Predicate[] predicates = types.stream()
-                .map(type -> criteriaBuilder.isMember(type, root.get("types")))
-                .toArray(Predicate[]::new);
+            Join<Card, String> typesJoin = root.joinSet("types");
             
-            return criteriaBuilder.or(predicates);
+            return typesJoin.in(types.stream().map(t -> t.toUpperCase()).toList());
         };
     }
 }

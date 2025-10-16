@@ -65,7 +65,6 @@ public class EditionServiceImp implements EditionService{
                         ooEditionIds.add(innerEditionEntity.getUUID());
                     }
 
-                    System.out.println("EditionServiceImp line 63: other orientation size is "+ entity.getOtherOrientation().size());
                     allEditions.add(entity);
                 }
             }

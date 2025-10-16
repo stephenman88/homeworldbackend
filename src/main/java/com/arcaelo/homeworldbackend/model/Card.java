@@ -14,12 +14,14 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name="cards")
 public class Card {
+    @ElementCollection
     private Set<String> classes;
     private Integer costMemory;
     private Integer costReserve;
     private Integer durability;
     @OneToMany(mappedBy="card", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Edition> editions;
+    @ElementCollection
     private Set<String> elements;
     @Column(columnDefinition = "text")
     private String effect;
@@ -34,6 +36,7 @@ public class Card {
     private HashMap<String, HashMap<String, Integer>> legality;
     private Integer level;
     private Integer life;
+    @Column(name="card_name")
     private String name;
     private Integer power;
     @Column(name="card_referenced_by", columnDefinition = "jsonb")

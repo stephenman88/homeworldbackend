@@ -39,3 +39,6 @@ out/
 **/env.properties
 **/application.properties
 **/application-test.properties
+
+*/application.properties
+src/main/resources/application.properties
