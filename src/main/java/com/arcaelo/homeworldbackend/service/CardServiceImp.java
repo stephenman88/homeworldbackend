@@ -153,7 +153,7 @@ public class CardServiceImp implements CardService {
         Integer durability,
         String effectPart,
         List<String> rarities,
-        List<String> cardSetIds,
+        List<String> cardSetPrefix,
         String themaCharmOperator,
         Integer themaCharm,
         String themaFerocityOperator,
@@ -199,7 +199,14 @@ public class CardServiceImp implements CardService {
             CardSpecHelper.isFast(speed),
             CardSpecHelper.containsText(slug, CardSpecHelper.FIELDS.STRING.SLUG),
             CardSpecHelper.hasSubtypes(subtypes),
-            CardSpecHelper.hasTypes(types)
+            CardSpecHelper.hasTypes(types),
+            CardSpecHelper.ofCardSet(cardSetPrefix),
+            CardSpecHelper.processThema(themaCharmOperator, themaCharm, CardSpecHelper.FIELDS.INTEGER.THEMA_CHARM),
+            CardSpecHelper.processThema(themaFerocityOperator, themaFerocity, CardSpecHelper.FIELDS.INTEGER.THEMA_FEROCITY),
+            CardSpecHelper.processThema(themaSumOperator, themaSum, CardSpecHelper.FIELDS.INTEGER.THEMA),
+            CardSpecHelper.processThema(themaGraceOperator, themaGrace, CardSpecHelper.FIELDS.INTEGER.THEMA_GRACE),
+            CardSpecHelper.processThema(themaMystiqueOperator, themaMystique, CardSpecHelper.FIELDS.INTEGER.THEMA_MYSTIQUE),
+            CardSpecHelper.processThema(themaValorOperator, themaValor, CardSpecHelper.FIELDS.INTEGER.THEMA_VALOR)
         );
 
         List<CardResponseDTO> returnDTOs = cardRepository.findAll(specs)

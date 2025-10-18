@@ -27,6 +27,7 @@ public class CardController {
             return new CardResponseShell(
                 List.of(),
                 0,
+                0,
                 1,
                 1,
                 false
@@ -36,6 +37,7 @@ public class CardController {
         List<CardResponseDTO> cardResponseDTOs = cardDTOs.subList(startIndex, endIndex <= cardDTOs.size() ? endIndex : cardDTOs.size());
         CardResponseShell response = new CardResponseShell(
             cardResponseDTOs,
+            cardDTOs.size(),
             cardResponseDTOs.size(),
             page,
             cardDTOs.size()/15 + 1,
@@ -50,6 +52,7 @@ public class CardController {
             CardResponseDTO responseDTO = cardService.getCardResponseById(id).orElseThrow();
             CardResponseShell response = new CardResponseShell(
                 List.of(responseDTO),
+                1,
                 1,
                 1,
                 1,
@@ -72,7 +75,7 @@ public class CardController {
         @RequestParam(required = false) Integer durability,
         @RequestParam(required = false) String effect,
         @RequestParam(required = false) List<String> rarity, //not working yet
-        @RequestParam(required = false) List<String> cardSetId, //not working yet
+        @RequestParam(required = false) List<String> setPrefix, //not working yet
         @RequestParam(required = false) String themaCharmOperator,
         @RequestParam(required = false) Integer themaCharm,
         @RequestParam(required = false) String themaFerocityOperator,
@@ -113,7 +116,7 @@ public class CardController {
                 durability,
                 effect,
                 rarity,
-                cardSetId,
+                setPrefix,
                 themaCharmOperator,
                 themaCharm,
                 themaFerocityOperator,
@@ -152,6 +155,7 @@ public class CardController {
                 return new CardResponseShell(
                     List.of(),
                     0,
+                    0,
                     1,
                     1,
                     false
@@ -162,6 +166,7 @@ public class CardController {
         List<CardResponseDTO> cardResponseDTOs = cardDTOs.subList(startIndex, endIndex <= cardDTOs.size() ? endIndex : cardDTOs.size());
         CardResponseShell response = new CardResponseShell(
             cardResponseDTOs,
+            cardDTOs.size(),
             cardResponseDTOs.size(),
             page,
             cardDTOs.size()/15 + 1,
@@ -173,8 +178,10 @@ public class CardController {
     private class CardResponseShell{
         @JsonProperty("data")
         private List<CardResponseDTO> cardResponseDTOs;
-        @JsonProperty("data_count")
+        @JsonProperty("page_data_count")
         private Integer dataCount;
+        @JsonProperty("total_data_count")
+        private Integer totalCount;
         @JsonProperty("page_number")
         private Integer pageNumber;
         @JsonProperty("has_next")
@@ -184,12 +191,14 @@ public class CardController {
 
         public CardResponseShell(
             List<CardResponseDTO> cardResponseDTOs,
+            Integer totalCount,
             Integer dataCount,
             Integer pageNumber,
             Integer totalPages,
             Boolean hasNext
         ){
             this.dataCount = dataCount;
+            this.totalCount = totalCount;
             this.pageNumber = pageNumber;
             this.cardResponseDTOs = cardResponseDTOs;
             this.totalPages = totalPages;
