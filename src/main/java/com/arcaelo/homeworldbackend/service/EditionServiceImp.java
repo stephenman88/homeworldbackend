@@ -1,14 +1,12 @@
 package com.arcaelo.homeworldbackend.service;
 
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.arcaelo.homeworldbackend.repo.EditionRepository;
 import com.arcaelo.homeworldbackend.model.Edition;
 import com.arcaelo.homeworldbackend.model.EditionDTO;
 import com.arcaelo.homeworldbackend.model.EditionMapper;
-import com.arcaelo.homeworldbackend.repo.EditionSpecHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -99,65 +97,6 @@ public class EditionServiceImp implements EditionService{
         return editionRepository.findAllById(ids).stream()
             .map(this::convertToDTO)
             .toList();
-    }
-
-    @Transactional
-    @Override
-    public List<EditionDTO> getEditionsByParameters(
-        String cardId,
-        Set<String> collaborators,
-        String collectorNumber,
-        String configuration,
-        String effect,
-        String effectHtml,
-        String effectRaw,
-        String flavor,
-        String illustrator,
-        String image,
-        String orientation,
-        String rarityOperator,
-        Integer rarity,
-        String slug,
-        String themaCharmOperator,
-        Integer themaCharm,
-        String themaFerocityOperator,
-        Integer themaFerocity,
-        String themaSumOperator,
-        Integer themaSum,
-        String themaGraceOperator,
-        Integer themaGrace,
-        String themaMystiqueOperator,
-        Integer themaMystique,
-        String themaValorOperator,
-        Integer themaValor,
-        String uuid
-    ){
-        return editionRepository.findAll(
-            Specification.allOf(EditionSpecHelper.isCard(cardId),
-            EditionSpecHelper.hasCollaborators(collaborators),
-            EditionSpecHelper.containsString(collectorNumber, EditionSpecHelper.FIELDS.STRING.COLLECTOR_NUMBER),
-            EditionSpecHelper.containsString(configuration, EditionSpecHelper.FIELDS.STRING.CONFIGURATION),
-            EditionSpecHelper.containsString(effect, EditionSpecHelper.FIELDS.STRING.EFFECT),
-            EditionSpecHelper.containsString(effectHtml, EditionSpecHelper.FIELDS.STRING.EFFECT_HTML),
-            EditionSpecHelper.containsString(effectRaw, EditionSpecHelper.FIELDS.STRING.EFFECT_RAW),
-            EditionSpecHelper.containsString(flavor, EditionSpecHelper.FIELDS.STRING.FLAVOR),
-            EditionSpecHelper.containsString(illustrator, EditionSpecHelper.FIELDS.STRING.ILLUSTRATOR),
-            EditionSpecHelper.containsString(image,EditionSpecHelper.FIELDS.STRING.IMAGE),
-            EditionSpecHelper.containsString(orientation, EditionSpecHelper.FIELDS.STRING.ORIENTATION),
-            EditionSpecHelper.processInteger(rarityOperator, rarity, EditionSpecHelper.FIELDS.INTEGER.RARITY),
-            EditionSpecHelper.containsString(slug, EditionSpecHelper.FIELDS.STRING.SLUG),
-            EditionSpecHelper.processInteger(themaCharmOperator, themaCharm, EditionSpecHelper.FIELDS.INTEGER.THEMA_CHARM_FOIL),
-            EditionSpecHelper.processInteger(themaCharmOperator, themaCharm, EditionSpecHelper.FIELDS.INTEGER.THEMA_CHARM_NONFOIL),
-            EditionSpecHelper.processInteger(themaFerocityOperator, themaFerocity, EditionSpecHelper.FIELDS.INTEGER.THEMA_FEROCITY_FOIL),
-            EditionSpecHelper.processInteger(themaFerocityOperator, themaFerocity, EditionSpecHelper.FIELDS.INTEGER.THEMA_FEROCITY_NONFOIL),
-            EditionSpecHelper.processInteger(themaGraceOperator, themaGrace, EditionSpecHelper.FIELDS.INTEGER.THEMA_GRACE_FOIL),
-            EditionSpecHelper.processInteger(themaGraceOperator, themaGrace, EditionSpecHelper.FIELDS.INTEGER.THEMA_GRACE_NONFOIL),
-            EditionSpecHelper.processInteger(themaMystiqueOperator, themaMystique, EditionSpecHelper.FIELDS.INTEGER.THEMA_MYSTIQUE_FOIL),
-            EditionSpecHelper.processInteger(themaMystiqueOperator, themaMystique, EditionSpecHelper.FIELDS.INTEGER.THEMA_MYSTIQUE_NONFOIL),
-            EditionSpecHelper.processInteger(themaValorOperator, themaValor, EditionSpecHelper.FIELDS.INTEGER.THEMA_VALOR_FOIL),
-            EditionSpecHelper.processInteger(themaValorOperator, themaValor, EditionSpecHelper.FIELDS.INTEGER.THEMA_VALOR_NONFOIL)
-        )).stream()
-        .map(this::convertToDTO).toList();
     }
 
     @Transactional
