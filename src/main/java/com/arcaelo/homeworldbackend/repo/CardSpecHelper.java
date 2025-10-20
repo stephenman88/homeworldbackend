@@ -40,6 +40,7 @@ public class CardSpecHelper {
             public static final String THEMA_MYSTIQUE="themaMystique";
             public static final String THEMA_VALOR="themaValor";
             public static final String THEMA = "thema";
+            public static final String RARITY = "rarity";
         }
         public static class STRING{
             private STRING(){}
@@ -190,6 +191,15 @@ public class CardSpecHelper {
                 }
             };
         }
+    }
+
+    public static Specification<Card> processRarity(List<Integer> rarities){
+        return (root, query, criteriaBuilder) -> {
+            if(rarities == null || rarities.isEmpty()) return null;
+
+            Join<Card, Edition> cardJoin = root.join("editions");
+            return cardJoin.get("rarity").in(rarities);
+        };
     }
 }
 

@@ -156,6 +156,11 @@ public class CardControllerTests extends WireMockIntBase{
             .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(8))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(MockMvcResultMatchers.jsonPath("$.data[4].uuid").value("ltv5klryvf"));
+
+            mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?rarity=4&rarity=5"))
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(16));
         }catch(Exception e){
             fail("CardControllerTests: testPullComplexCard failed with exception: " + e.getMessage());
         }

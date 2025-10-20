@@ -152,7 +152,7 @@ public class CardServiceImp implements CardService {
         String durabilityOperator,
         Integer durability,
         String effectPart,
-        List<String> rarities,
+        List<Integer> rarities,
         List<String> cardSetPrefix,
         String themaCharmOperator,
         Integer themaCharm,
@@ -206,7 +206,8 @@ public class CardServiceImp implements CardService {
             CardSpecHelper.processThema(themaSumOperator, themaSum, CardSpecHelper.FIELDS.INTEGER.THEMA),
             CardSpecHelper.processThema(themaGraceOperator, themaGrace, CardSpecHelper.FIELDS.INTEGER.THEMA_GRACE),
             CardSpecHelper.processThema(themaMystiqueOperator, themaMystique, CardSpecHelper.FIELDS.INTEGER.THEMA_MYSTIQUE),
-            CardSpecHelper.processThema(themaValorOperator, themaValor, CardSpecHelper.FIELDS.INTEGER.THEMA_VALOR)
+            CardSpecHelper.processThema(themaValorOperator, themaValor, CardSpecHelper.FIELDS.INTEGER.THEMA_VALOR),
+            CardSpecHelper.processRarity(rarities)
         );
 
         List<CardResponseDTO> returnDTOs = cardRepository.findAll(specs)
@@ -225,7 +226,7 @@ public class CardServiceImp implements CardService {
         String durabilityOperator,
         Integer durability,
         String effectPart,
-        List<String> rarities,
+        List<Integer> rarities,
         List<String> cardSetIds,
         String themaCharmOperator,
         Integer themaCharm,
