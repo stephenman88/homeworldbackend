@@ -1,11 +1,13 @@
 package com.arcaelo.homeworldbackend.repo;
 
 import org.springframework.data.jpa.domain.Specification;
+
 import java.util.List;
 import com.arcaelo.homeworldbackend.model.Card;
 import com.arcaelo.homeworldbackend.model.CardSet;
 import com.arcaelo.homeworldbackend.model.Edition;
 
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 
 public class CardSpecHelper {
@@ -199,6 +201,42 @@ public class CardSpecHelper {
 
             Join<Card, Edition> cardJoin = root.join("editions");
             return cardJoin.get("rarity").in(rarities);
+        };
+    }
+
+    public static Specification<Card> processLegality(String format, String operator, Integer limit){
+        return (root, query, criteriaBuilder) -> {
+            if(format == null || format.isEmpty() || operator == null || operator.isEmpty() || limit == null) return null;
+            
+            Expression<String> jsonValue = criteriaBuilder.function(
+                    "jsonb_extract_path_text", 
+                    String.class,
+                    root.get("legality"),
+                    criteriaBuilder.literal(format.toUpperCase()),
+                    criteriaBuilder.literal("limit")
+                 );
+
+            if(operator.matches("^>$")){
+                if(limit >= 4) return criteriaBuilder.disjunction();
+                return criteriaBuilder.or(criteriaBuilder.greaterThan(jsonValue, limit.toString()), criteriaBuilder.isNull(root.get("legality")));
+            }else if(operator.matches("^>=$")){
+                if(limit > 4) return criteriaBuilder.disjunction();
+                return criteriaBuilder.or(criteriaBuilder.greaterThanOrEqualTo(jsonValue, limit.toString()), criteriaBuilder.isNull(root.get("legality")));
+            }else if(operator.matches("^=$")){
+                if(limit > 4 || limit < 0) criteriaBuilder.disjunction();
+                if(limit == 4) criteriaBuilder.isNull(root.get("legality"));
+                return criteriaBuilder.equal(jsonValue, limit.toString());
+            }else if(operator.matches("^<=$")){
+                if(limit < 0) return criteriaBuilder.disjunction();
+                if(limit >= 4) return criteriaBuilder.conjunction();
+                return criteriaBuilder.lessThanOrEqualTo(jsonValue, limit.toString());
+            }else if(operator.matches("<")){
+                if(limit <= 0) return criteriaBuilder.disjunction();
+                if(limit > 4) return criteriaBuilder.conjunction();
+                return criteriaBuilder.lessThan(jsonValue, limit.toString());
+            }else{
+                return null;
+            }
         };
     }
 }

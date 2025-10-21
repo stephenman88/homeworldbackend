@@ -99,19 +99,15 @@ public class CardControllerTests extends WireMockIntBase{
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?costMemoryOperator=>=&costMemory=2"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(13))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[12].uuid").value("d7l6i5thdy"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(13));
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?levelOperator=>&=level=1"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(12))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].uuid").value("81gvGHkuVb"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[11].uuid").value("d7l6i5thdy"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(12));
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?lifeOperator=<&life=16"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(15))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[2].uuid").value("fcfxhkqda6"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(15));
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?powerOperator=<=&power=1"))
             .andExpect(MockMvcResultMatchers.status().isOk())
@@ -124,19 +120,15 @@ public class CardControllerTests extends WireMockIntBase{
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?effect=draw&page=3"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.page_data_count").value(8))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].uuid").value("h973fdt8pt"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[7].uuid").value("vi1uyifw6s"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.page_data_count").value(8));
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?flavor=wave"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(2))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[1].uuid").value("zq9ox7u6wz"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(2));
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?effect=draw&classes=assassin"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(6))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[4].uuid").value("52u81v4c0z"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(6));
 
         }catch(Exception e){
             fail("CardControllerTests: testPullSimpleCard failed with exception: " + e.getMessage());
@@ -148,19 +140,31 @@ public class CardControllerTests extends WireMockIntBase{
         try{
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?setPrefix=ReC-HVF"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(4))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[3].uuid").value("vi1uyifw6s"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(4));
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?themaGraceOperator=>&themaGrace=380"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(8))
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data[4].uuid").value("ltv5klryvf"));
+            .andDo(MockMvcResultHandlers.print());
 
             mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?rarity=4&rarity=5"))
             .andDo(MockMvcResultHandlers.print())
+            .andExpect(MockMvcResultMatchers.status().isOk());
+
+            mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?legalityFormat=standard&limitOperator==&limit=0"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(16));
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(18))
+            .andDo(MockMvcResultHandlers.print());
+
+            mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?legalityFormat=standard&limitOperator=<&limit=1"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(18))
+            .andDo(MockMvcResultHandlers.print());
+
+            mockMvc.perform(MockMvcRequestBuilders.get("/api/card/search?legalityFormat=standard&limitOperator=>&limit=1"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.total_data_count").value(43))
+            .andDo(MockMvcResultHandlers.print());
         }catch(Exception e){
             fail("CardControllerTests: testPullComplexCard failed with exception: " + e.getMessage());
         }

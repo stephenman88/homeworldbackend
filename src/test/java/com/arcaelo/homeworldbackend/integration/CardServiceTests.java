@@ -116,6 +116,7 @@ public class CardServiceTests extends WireMockIntBase{
 
         assertSpiritOfWind(dtos);
         assertAzuriteFatestone(dtos);
+        assertNamelessChampion(dtos);
     }
 
     void assertApotheosisRite(){
@@ -498,5 +499,20 @@ public class CardServiceTests extends WireMockIntBase{
         assertEquals("Abyssal Heaven First Edition", ambCardsetDTO.getName());
         assertEquals("HVN 1st", ambCardsetDTO.getPrefix());
         assertEquals("2025-03-04T21:56:32.906+00:00", ambCardsetDTO.getLastUpdate());
+    }
+
+    void assertNamelessChampion(List<CardResponseDTO> dtos){
+        CardResponseDTO ncDTO = null;
+        for(CardResponseDTO currentDto : dtos){
+            if(currentDto.getUUID().equals("86flbytki3")){
+                ncDTO = currentDto;
+            }
+        }
+
+        assertNotNull(ncDTO);
+        assertNotNull(ncDTO.getLegality());
+        assertTrue(ncDTO.getLegality().containsKey("STANDARD"));
+        assertTrue(ncDTO.getLegality().get("STANDARD").containsKey("limit"));
+        assertEquals(ncDTO.getLegality().get("STANDARD").get("limit"), 0);
     }
 }

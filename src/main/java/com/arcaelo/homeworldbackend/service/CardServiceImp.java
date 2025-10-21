@@ -207,7 +207,8 @@ public class CardServiceImp implements CardService {
             CardSpecHelper.processThema(themaGraceOperator, themaGrace, CardSpecHelper.FIELDS.INTEGER.THEMA_GRACE),
             CardSpecHelper.processThema(themaMystiqueOperator, themaMystique, CardSpecHelper.FIELDS.INTEGER.THEMA_MYSTIQUE),
             CardSpecHelper.processThema(themaValorOperator, themaValor, CardSpecHelper.FIELDS.INTEGER.THEMA_VALOR),
-            CardSpecHelper.processRarity(rarities)
+            CardSpecHelper.processRarity(rarities),
+            CardSpecHelper.processLegality(legalityFormat, limitOperator, limit)
         );
 
         List<CardResponseDTO> returnDTOs = cardRepository.findAll(specs)
@@ -380,7 +381,25 @@ public class CardServiceImp implements CardService {
             dto.setEffect(node.path("effect").isNull() ? null : node.path("effect").asText());
             dto.setEffectRaw(node.path("effect_raw").isNull() ? null : node.path("effect_raw").asText());
             dto.setFlavor(node.path("flavor").isNull() ? null : node.path("flavor").asText());
-            dto.setLegality(null);
+            
+            HashMap<String, HashMap<String, Integer>> legality = new HashMap<String, HashMap<String, Integer>>();
+            if(!node.path("legality").isNull()){
+                if(node.path("legality").has("STANDARD")){
+                    if(legality.containsKey("STANDARD")){
+                        legality.get("STANDARD").put("limit", node.path("legality").path("limit").intValue());
+                    }else{
+                        HashMap<String, Integer> standardLimit = new HashMap<String, Integer>();
+                        standardLimit.put("limit", node.path("legality").path("limit").intValue());
+                        legality.put("STANDARD", standardLimit);
+                    }
+                }
+            }
+            if(legality.isEmpty()){
+                dto.setLegality(null);
+            }else{
+                dto.setLegality(legality);
+            }
+
             dto.setLevel(node.path("level").isNull() ? null : node.path("level").numberValue().intValue());
             dto.setLife(node.path("life").isNumber() ? node.path("life").asInt() : null);
             dto.setName(node.path("name").asText());
@@ -471,7 +490,25 @@ public class CardServiceImp implements CardService {
             dto.setEffect(node.path("effect").isNull() ? null : node.path("effect").asText());
             dto.setEffectRaw(node.path("effect_raw").isNull() ? null : node.path("effect_raw").asText());
             dto.setFlavor(node.path("flavor").isNull() ? null : node.path("flavor").asText());
-            dto.setLegality(null);
+
+            HashMap<String, HashMap<String, Integer>> legality = new HashMap<String, HashMap<String, Integer>>();
+            if(!node.path("legality").isNull()){
+                if(node.path("legality").has("STANDARD")){
+                    if(legality.containsKey("STANDARD")){
+                        legality.get("STANDARD").put("limit", node.path("legality").path("limit").intValue());
+                    }else{
+                        HashMap<String, Integer> standardLimit = new HashMap<String, Integer>();
+                        standardLimit.put("limit", node.path("legality").path("limit").intValue());
+                        legality.put("STANDARD", standardLimit);
+                    }
+                }
+            }
+            if(legality.isEmpty()){
+                dto.setLegality(null);
+            }else{
+                dto.setLegality(legality);
+            }
+
             dto.setLevel(node.path("level").isNull() ? null : node.path("level").numberValue().intValue());
             dto.setLife(node.path("life").isNumber() ? node.path("life").asInt() : null);
             dto.setName(node.path("name").asText());
