@@ -2,6 +2,9 @@ package com.arcaelo.homeworldbackend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,21 +21,36 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        return http.authorizeHttpRequests(request -> 
-            request.requestMatchers("/api/card/**").permitAll()
-                .anyRequest().authenticated())
+        return http.csrf(csrf->csrf.disable())
+            .authorizeHttpRequests(request -> 
+                request.requestMatchers("/api/card/**", "/auth/login").permitAll()
+                    .anyRequest().authenticated())
             .httpBasic(Customizer.withDefaults()).build();
     }
 
     @Bean
-    public UserDetailsService userDetailsService(){
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    public AuthenticationManager authenticationManager(
+        UserDetailsService userDetailsService,
+        PasswordEncoder passwordEncoder){
+            DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+            authenticationProvider.setPasswordEncoder(passwordEncoder);
 
-        UserDetails user = User.withUsername("user")
+            return new ProviderManager(authenticationProvider);
+        }
+
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder encoder){
+        UserDetails user = User
+            .withUsername("user")
             .password(encoder.encode("password"))
             .roles("USER")
             .build();
 
         return new InMemoryUserDetailsManager(user);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }
