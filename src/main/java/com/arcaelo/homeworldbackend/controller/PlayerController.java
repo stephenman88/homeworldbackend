@@ -5,13 +5,14 @@ import com.arcaelo.homeworldbackend.service.PlayerService;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/players")
+@RequestMapping("/api/player")
 public class PlayerController {
     private final PlayerService playerService;
 
@@ -22,6 +23,16 @@ public class PlayerController {
     @GetMapping
     public List<PlayerDTO> getAllPlayers(){
         return playerService.getAllPlayers();
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> testResponse(){
+        try{
+            String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+            return ResponseEntity.ok().body(userName);
+        }catch(Exception e){
+            return ResponseEntity.status(401).body("Failure to pass test api: " + e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
