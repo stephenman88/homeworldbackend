@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.arcaelo.homeworldbackend.service.JpaUserDetailsService;
+import com.arcaelo.homeworldbackend.util.JwtBlacklist;
 import com.arcaelo.homeworldbackend.util.JwtTokenUtil;
 
 import jakarta.servlet.FilterChain;
@@ -22,10 +23,12 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final JpaUserDetailsService jpaUserDetailsService;
+    private final JwtBlacklist jwtBlacklist;
 
-    public JwtFilter(JwtTokenUtil jwtTokenUtil, JpaUserDetailsService jpaUserDetailsService){
+    public JwtFilter(JwtTokenUtil jwtTokenUtil, JpaUserDetailsService jpaUserDetailsService, JwtBlacklist jwtBlacklist){
         this.jwtTokenUtil = jwtTokenUtil;
         this.jpaUserDetailsService = jpaUserDetailsService;
+        this.jwtBlacklist = jwtBlacklist;
     }
 
     @Override
@@ -36,6 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             try{
+                if(jwtBlacklist.isRevoked(token)){throw new Exception("token blacklisted");};
                 String email = jwtTokenUtil.parseToken(token);
                 UserDetails user = jpaUserDetailsService.loadUserByUsername(email);
 
