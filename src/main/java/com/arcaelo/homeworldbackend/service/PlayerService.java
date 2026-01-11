@@ -8,7 +8,8 @@ import java.util.Optional;
 public interface PlayerService {
     List<PlayerDTO> getAllPlayers();
     Optional<PlayerDTO> getPlayerById(Long Id);
-    PlayerDTO savePlayer(PlayerDTO playerDTO);
+    Optional<PlayerDTO> getPlayerByEmail(String email);
+    PlayerDTO saveNewPlayer(PlayerDTO playerDTO);
     PlayerDTO updatePlayer(Long id, PlayerDTO playerDTO);
     void deletePlayer(Long id);
 }

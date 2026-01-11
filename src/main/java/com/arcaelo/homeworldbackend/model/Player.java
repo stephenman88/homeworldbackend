@@ -21,6 +21,7 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
     private Long id;
+    @Column(unique = true)
     private String email;
     private String password;
     private String name;

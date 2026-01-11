@@ -34,8 +34,16 @@ public class PlayerServiceImp implements PlayerService{
     }
 
     @Override
-    public PlayerDTO savePlayer(PlayerDTO playerDTO){
+    public Optional<PlayerDTO> getPlayerByEmail(String email){
+        return playerRepository.findByEmail(email).map(this::convertToDTO);
+    }
+
+    @Override
+    public PlayerDTO saveNewPlayer(PlayerDTO playerDTO){
         Player player = convertToEntity(playerDTO);
+        if(playerRepository.findByEmail(player.getEmail()).isPresent()){
+            return null;
+        }
         Player savedPlayer = playerRepository.save(player);
         return convertToDTO(savedPlayer);
     }

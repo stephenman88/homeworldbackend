@@ -3,7 +3,6 @@ package com.arcaelo.homeworldbackend.controller;
 import com.arcaelo.homeworldbackend.model.PlayerDTO;
 import com.arcaelo.homeworldbackend.service.PlayerService;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +19,6 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-    @GetMapping
-    public List<PlayerDTO> getAllPlayers(){
-        return playerService.getAllPlayers();
-    }
-
     @GetMapping("/test")
     public ResponseEntity<String> testResponse(){
         try{
@@ -35,21 +29,19 @@ public class PlayerController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PlayerDTO> getPlayerById(@PathVariable Long id){
-        Optional<PlayerDTO> player = playerService.getPlayerById(id);
+    @GetMapping
+    public ResponseEntity<PlayerDTO> getPlayerById(){
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<PlayerDTO> player = playerService.getPlayerByEmail(userName);
         return player.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public PlayerDTO createPlayer(@RequestBody PlayerDTO playerDTO){
-        return playerService.savePlayer(playerDTO);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<PlayerDTO> updatePlayer(@PathVariable Long id, @RequestBody PlayerDTO playerDTO){
+    @PutMapping
+    public ResponseEntity<PlayerDTO> updatePlayer(@RequestBody PlayerDTO playerDTO){
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         try{
-            PlayerDTO updatedPlayer = playerService.updatePlayer(id, playerDTO);
+            PlayerDTO playerProfile = playerService.getPlayerByEmail(userName).get();
+            PlayerDTO updatedPlayer = playerService.updatePlayer(playerProfile.getId(), playerDTO);
             return ResponseEntity.ok(updatedPlayer);
         }catch(Exception e){
             return ResponseEntity.notFound().build();
