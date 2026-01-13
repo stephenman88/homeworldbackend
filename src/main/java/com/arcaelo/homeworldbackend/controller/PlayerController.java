@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -48,9 +47,15 @@ public class PlayerController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
-        playerService.deletePlayer(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteProduct(){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        try{
+            PlayerDTO playerProfile = playerService.getPlayerByEmail(email).get();
+            playerService.deletePlayer(playerProfile.getId());
+            return ResponseEntity.noContent().build();
+        }catch(Exception e){
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
