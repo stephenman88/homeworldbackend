@@ -1,5 +1,7 @@
 package com.arcaelo.homeworldbackend.model;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ public abstract class DeckMapper{
     protected PlayerRepository playerRepository;
 
     @Mapping(source = "player.id", target = "playerId")
+    @Mapping(source = "displayCard.id", target = "displayCardId")
+    @Mapping(source = "deckList", target="deckListIds")
     public abstract DeckDTO toDTO(Deck deck);
 
     @Mapping(source = "playerId", target = "player.id")
@@ -27,5 +31,15 @@ public abstract class DeckMapper{
             deck.setPlayer(player);
         }
         return deck;
+    }
+
+    protected Long mapCardPieceToCardPieceIds(CardPiece cardPiece){
+        if(cardPiece == null) return null;
+        return cardPiece.getId();
+    }
+
+    protected List<Long> mapDeckListToDeckListIds(List<CardPiece> deckList){
+        if(deckList == null) return null;
+        return deckList.stream().map(cp -> cp.getId()).toList();
     }
 }
