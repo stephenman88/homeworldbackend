@@ -2,18 +2,20 @@ package com.arcaelo.homeworldbackend.model;
 
 import java.util.List;
 
-public class DeckDTO{
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class DeckResponseDTO {
+    @JsonProperty("id")
     private Long id;
-    private Long playerId;
+    @JsonProperty("display_card")
     private CardPieceDTO displayCard;
+    @JsonProperty("deck_list")
     private List<CardPieceDTO> deckList;
+    @JsonProperty("hide_status")
     private String hideStatus;
 
     public Long getId(){return id;}
     public void setId(Long id){this.id = id;}
-
-    public Long getPlayerId(){return playerId;}
-    public void setPlayerId(Long playerId){this.playerId = playerId;}
 
     public CardPieceDTO getDisplayCard(){return displayCard;}
     public void setDisplayCard(CardPieceDTO displayCard){this.displayCard = displayCard;}

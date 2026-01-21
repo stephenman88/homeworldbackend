@@ -2,8 +2,13 @@ package com.arcaelo.homeworldbackend.service;
 
 import com.arcaelo.homeworldbackend.model.DeckDTO;
 import com.arcaelo.homeworldbackend.model.DeckMapper;
+import com.arcaelo.homeworldbackend.model.DeckRequestBodyDTO;
+import com.arcaelo.homeworldbackend.model.DeckResponseDTO;
 import com.arcaelo.homeworldbackend.model.Deck;
 import com.arcaelo.homeworldbackend.repo.DeckRepository;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,8 +31,31 @@ public class DeckServiceImp implements DeckService{
     }
 
     @Override
+    public List<DeckResponseDTO> getAllDecksAsResponse(Long playerId){
+        Specification<Deck> spec = getByPlayerId(playerId);
+        return deckRepository.findAll(spec).stream().map(this::convertToResponseDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DeckDTO> getSampleDecks(){
+        Pageable p = Pageable.ofSize(20);
+        return deckRepository.findAll(p).stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DeckDTO> getAllDecks(Long playerId){
+        Specification<Deck> spec = getByPlayerId(playerId);
+        return deckRepository.findAll(spec).stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<DeckDTO> getDeckById(Long id){
         return deckRepository.findById(id).map(this::convertToDTO);
+    }
+
+    @Override
+    public Optional<DeckResponseDTO> getDeckResponseById(Long id){
+        return deckRepository.findById(id).map(this::convertToResponseDTO);
     }
 
     @Override
@@ -54,7 +82,29 @@ public class DeckServiceImp implements DeckService{
         return deckMapper.toDTO(deck);
     }
 
+    @Override
+    public DeckDTO convertToDTO(DeckRequestBodyDTO deckRequestBodyDTO){
+        return deckMapper.toDTO(deckRequestBodyDTO);
+    }
+
+    private DeckResponseDTO convertToResponseDTO(Deck deck){
+        return deckMapper.toResponseDTO(deck);
+    }
+
+    @Override
+    public DeckResponseDTO convertToResponseDTO(DeckDTO deck){
+        return deckMapper.toResponseDTO(deck);
+    }
+
     private Deck convertToEntity(DeckDTO deckDTO){
         return deckMapper.toEntity(deckDTO);
+    }
+
+    private Specification<Deck> getByPlayerId(Long playerId){
+        return (root, query, criteriaBuilder) -> {
+            if(playerId == null) return null;
+            
+            return criteriaBuilder.equal(root.get("player").get("id"), playerId);
+        };
     }
 }

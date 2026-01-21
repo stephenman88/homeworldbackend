@@ -15,10 +15,10 @@ public class CardPiece {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "card_uuid", referencedColumnName = "uuid")
+    @JoinColumn(name = "card_id", referencedColumnName = "uuid")
     private Card cardData;
     @ManyToOne
-    @JoinColumn(name = "edition_uuid", referencedColumnName = "uuid")
+    @JoinColumn(name = "edition_id", referencedColumnName = "uuid")
     private Edition editionData;
     private String imageUrl;
 

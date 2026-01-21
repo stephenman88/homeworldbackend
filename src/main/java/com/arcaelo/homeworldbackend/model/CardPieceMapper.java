@@ -24,6 +24,8 @@ public abstract class CardPieceMapper {
     @Mapping(source = "editionData.UUID", target="editionDataUUID")
     public abstract CardPieceDTO toDTO(CardPiece cardPiece);
 
+    @Mapping(source = "cardDataUUID", target= "cardData.UUID")
+    @Mapping(source = "editionDataUUID", target="editionData.UUID")
     public CardPiece toEntity(CardPieceDTO cardPieceDTO){
         if(cardPieceDTO.getCardDataUUID() == null || cardPieceDTO.getEditionDataUUID() == null){
             return null;
@@ -58,13 +60,13 @@ public abstract class CardPieceMapper {
 
     private Specification<CardPiece> filterByCardUUI(String cardUUID){
         return(root, query, criteriaBuilder) -> {
-            return criteriaBuilder.like(root.get("card_uuid"), cardUUID);
+            return criteriaBuilder.like(root.get("cardData").get("uuid"), cardUUID);
         };
     }
 
     private Specification<CardPiece> filterByEditionUUID(String editionUUID){
         return(root, query, criteriaBuilder) -> {
-            return criteriaBuilder.like(root.get("edition_uuid"), editionUUID);
+            return criteriaBuilder.like(root.get("editionData").get("uuid"), editionUUID);
         };
     }
 }
