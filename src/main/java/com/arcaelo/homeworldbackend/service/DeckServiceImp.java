@@ -4,6 +4,7 @@ import com.arcaelo.homeworldbackend.model.DeckDTO;
 import com.arcaelo.homeworldbackend.model.DeckMapper;
 import com.arcaelo.homeworldbackend.model.DeckRequestBodyDTO;
 import com.arcaelo.homeworldbackend.model.DeckResponseDTO;
+import com.arcaelo.homeworldbackend.model.DeckSimpleResponseDTO;
 import com.arcaelo.homeworldbackend.model.Deck;
 import com.arcaelo.homeworldbackend.repo.DeckRepository;
 
@@ -37,9 +38,15 @@ public class DeckServiceImp implements DeckService{
     }
 
     @Override
-    public List<DeckDTO> getSampleDecks(){
+    public List<DeckSimpleResponseDTO> getAllDecksAsSimpleResponse(Long playerId){
+        Specification<Deck> spec = getByPlayerId(playerId);
+        return deckRepository.findAll(spec).stream().map(this::convertToSimpleResponseDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DeckSimpleResponseDTO> getSampleDecks(){
         Pageable p = Pageable.ofSize(20);
-        return deckRepository.findAll(p).stream().map(this::convertToDTO).collect(Collectors.toList());
+        return deckRepository.findAll(p).stream().map(this::convertToSimpleResponseDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -91,9 +98,17 @@ public class DeckServiceImp implements DeckService{
         return deckMapper.toResponseDTO(deck);
     }
 
+    private DeckSimpleResponseDTO convertToSimpleResponseDTO(Deck deck){
+        return deckMapper.toSimpleResponseDTO(deck);
+    }
+
     @Override
     public DeckResponseDTO convertToResponseDTO(DeckDTO deck){
         return deckMapper.toResponseDTO(deck);
+    }
+
+    private DeckSimpleResponseDTO convertToSimpleResponseDTO(DeckDTO deck){
+        return deckMapper.toSimpleResponseDTO(deck);
     }
 
     private Deck convertToEntity(DeckDTO deckDTO){

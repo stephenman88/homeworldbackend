@@ -4,6 +4,7 @@ import com.arcaelo.homeworldbackend.model.Deck;
 import com.arcaelo.homeworldbackend.model.DeckDTO;
 import com.arcaelo.homeworldbackend.model.DeckRequestBodyDTO;
 import com.arcaelo.homeworldbackend.model.DeckResponseDTO;
+import com.arcaelo.homeworldbackend.model.DeckSimpleResponseDTO;
 import com.arcaelo.homeworldbackend.model.PlayerDTO;
 import com.arcaelo.homeworldbackend.service.DeckService;
 import com.arcaelo.homeworldbackend.service.PlayerService;
@@ -27,11 +28,11 @@ public class DeckController {
     }
     
     @GetMapping
-    public ResponseEntity<List<DeckResponseDTO>> getOwnDecks(){
+    public ResponseEntity<List<DeckSimpleResponseDTO>> getOwnDecks(){
         try{
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             PlayerDTO playerDTO = playerService.getPlayerByEmail(email).orElseThrow();
-            List<DeckResponseDTO> allDeckLists = deckService.getAllDecksAsResponse(playerDTO.getId());
+            List<DeckSimpleResponseDTO> allDeckLists = deckService.getAllDecksAsSimpleResponse(playerDTO.getId());
             return ResponseEntity.ok().body(allDeckLists);
         }catch(Exception e){
             System.out.println(e);
@@ -40,7 +41,7 @@ public class DeckController {
     }
 
     @GetMapping("/random")
-    public List<DeckDTO> getSampleDecks(){
+    public List<DeckSimpleResponseDTO> getSampleDecks(){
         return deckService.getSampleDecks();
     }
 

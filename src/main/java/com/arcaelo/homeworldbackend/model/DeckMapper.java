@@ -42,7 +42,18 @@ public abstract class DeckMapper{
         return dto;
     }
 
+    @Mapping(source = "displayCard", target = "displayCard")
+    public DeckSimpleResponseDTO toSimpleResponseDTO(Deck deck){
+        DeckSimpleResponseDTO dto = new DeckSimpleResponseDTO();
+        dto.setId(deck.getId());
+        dto.setHideStatus(deck.getHideStatus());
+        dto.setDisplayCard(cpMapper.toDTO(deck.getDisplayCard()));
+        return dto;
+    }
+
     public abstract DeckResponseDTO toResponseDTO(DeckDTO deckDTO);
+
+    public abstract DeckSimpleResponseDTO toSimpleResponseDTO(DeckDTO deckDTO);
 
     @Mapping(source = "playerId", target = "player.id")
     public Deck toEntity(DeckDTO deckDTO){
