@@ -5,15 +5,15 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DeckRequestBodyDTO {
-    private CardPieceDTO displayCard;
+    private String displayEditionId;
     private List<CardPieceDTO> deckList;
     private String hideStatus;
 
-    @JsonProperty("display_card")
-    public void setDisplayCard(CardPieceDTO displayCard){
-        this.displayCard = displayCard;
+    @JsonProperty("display_edition_id")
+    public void setDisplayEditionId(String displayEditionId){
+        this.displayEditionId = displayEditionId;
     }
-    public CardPieceDTO getDisplayCard(){return displayCard;}
+    public String getDisplayEditionId(){return displayEditionId;}
 
     @JsonProperty("deck_list")
     public void setDeckList(List<CardPieceDTO> deckList){

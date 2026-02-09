@@ -63,16 +63,12 @@ public class DeckController {
 
     @PostMapping(path = "/new", consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DeckResponseDTO> createDeck(@RequestBody DeckRequestBodyDTO deckBodyDTO){
-        System.out.println("DeckController: deck_list size" + deckBodyDTO.getDeckList().size());
-        System.out.println("DeckController: hidden_status" + deckBodyDTO.getHideStatus());
         try{
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             PlayerDTO playerDTO = playerService.getPlayerByEmail(email).orElseThrow();
             DeckDTO deckDTO = deckService.convertToDTO(deckBodyDTO);
             deckDTO.setId(null);
             deckDTO.setPlayerId(playerDTO.getId());
-            System.out.println("DeckController: deck_list size" + deckDTO.getDeckList().size());
-            System.out.println("DeckController: hidden_status" + deckDTO.getHideStatus());
             return ResponseEntity.ok().body(deckService.convertToResponseDTO(deckService.saveDeck(deckDTO)));
         }catch(Exception e){
             System.out.println(e);
@@ -82,13 +78,22 @@ public class DeckController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DeckResponseDTO> updateDeck(@PathVariable Long id, @RequestBody DeckRequestBodyDTO deckBodyDTO){
+        try{
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             PlayerDTO playerDTO = playerService.getPlayerByEmail(email).orElseThrow();
-            DeckDTO deckDTO = deckService.convertToDTO(deckBodyDTO);
-            deckDTO.setId(id);
-            deckDTO.setPlayerId(playerDTO.getId());
-            DeckResponseDTO response = deckService.convertToResponseDTO(deckService.updateDeck(id, deckDTO));
-            return ResponseEntity.ok().body(response);
+            DeckDTO ogDTO = deckService.getDeckById(id).orElseThrow();
+            if(playerDTO.getId() == ogDTO.getPlayerId()){
+                DeckDTO deckDTO = deckService.convertToDTO(deckBodyDTO);
+                deckDTO.setId(id);
+                deckDTO.setPlayerId(playerDTO.getId());
+                DeckResponseDTO response = deckService.convertToResponseDTO(deckService.updateDeck(id, deckDTO));
+                return ResponseEntity.ok().body(response);
+            }
+            return ResponseEntity.badRequest().build();
+        }catch(Exception e){
+            System.out.println(e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")

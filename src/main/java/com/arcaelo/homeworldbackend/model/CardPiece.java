@@ -1,6 +1,7 @@
 package com.arcaelo.homeworldbackend.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,9 +22,15 @@ public class CardPiece {
     @JoinColumn(name = "edition_id", referencedColumnName = "uuid")
     private Edition editionData;
     private String imageUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deck_id")
+    private Deck deck;
 
     public Long getId(){return id;}
     public void setId(Long id){this.id = id;}
+
+    public Deck getDeck(){return deck;}
+    public void setDeck(Deck deck){this.deck = deck;}
 
     public Card getCardData(){return cardData;}
     public void setCardData(Card cardData){this.cardData = cardData;}

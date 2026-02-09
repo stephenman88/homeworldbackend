@@ -5,7 +5,7 @@ import java.util.List;
 public class DeckDTO{
     private Long id;
     private Long playerId;
-    private CardPieceDTO displayCard;
+    private String displayEditionId;
     private List<CardPieceDTO> deckList;
     private String hideStatus;
 
@@ -15,8 +15,8 @@ public class DeckDTO{
     public Long getPlayerId(){return playerId;}
     public void setPlayerId(Long playerId){this.playerId = playerId;}
 
-    public CardPieceDTO getDisplayCard(){return displayCard;}
-    public void setDisplayCard(CardPieceDTO displayCard){this.displayCard = displayCard;}
+    public String getDisplayEditionId(){return displayEditionId;}
+    public void setDisplayEditionId(String displayEditionId){this.displayEditionId = displayEditionId;}
 
     public List<CardPieceDTO> getDeckList(){return deckList;}
     public void setDeckList(List<CardPieceDTO> deckList){this.deckList = deckList;}

@@ -5,16 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DeckSimpleResponseDTO {
     @JsonProperty("id")
     private Long id;
-    @JsonProperty("display_card")
-    private CardPieceDTO displayCard;
+    @JsonProperty("display_card_url")
+    private String displayCardUrl;
     @JsonProperty("hide_status")
     private String hideStatus;
 
     public Long getId(){return id;}
     public void setId(Long id){this.id = id;}
 
-    public CardPieceDTO getDisplayCard(){return displayCard;}
-    public void setDisplayCard(CardPieceDTO displayCard){this.displayCard = displayCard;}
+    public String getDisplayCardUrl(){return displayCardUrl;}
+    public void setDisplayCardUrl(String displayCardUrl){this.displayCardUrl = displayCardUrl;}
 
     public String getHideStatus(){return hideStatus;}
     public void setHideStatus(String hideStatus){this.hideStatus = hideStatus;}

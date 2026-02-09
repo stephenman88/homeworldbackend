@@ -14,14 +14,9 @@ public class Deck {
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
     @ManyToOne
-    @JoinColumn(name = "display_card_id", referencedColumnName = "id")
-    private CardPiece displayCard;
-    @ManyToMany
-    @JoinTable(
-        name="deck_cardpieces",
-        joinColumns = @JoinColumn(name="deck_id"),
-        inverseJoinColumns = @JoinColumn(name="card_id")
-    )
+    @JoinColumn(name = "display_card_edition_id", referencedColumnName = "uuid")
+    private Edition displayEdition;
+    @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval=true)
     private List<CardPiece> deckList;
     private String hideStatus;
 
@@ -37,8 +32,8 @@ public class Deck {
     public Player getPlayer(){return player;}
     public void setPlayer(Player player){this.player = player;}
 
-    public CardPiece getDisplayCard(){return displayCard;}
-    public void setDisplayCard(CardPiece displayCard){this.displayCard = displayCard;}
+    public Edition getDisplayEdition(){return displayEdition;}
+    public void setDisplayEdition(Edition displayEdition){this.displayEdition = displayEdition;}
 
     public List<CardPiece> getDeckList(){return deckList;}
     public void setDeckList(List<CardPiece> deckList){this.deckList = deckList;}

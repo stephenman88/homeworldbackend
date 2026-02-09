@@ -5,8 +5,10 @@ import com.arcaelo.homeworldbackend.model.DeckMapper;
 import com.arcaelo.homeworldbackend.model.DeckRequestBodyDTO;
 import com.arcaelo.homeworldbackend.model.DeckResponseDTO;
 import com.arcaelo.homeworldbackend.model.DeckSimpleResponseDTO;
+import com.arcaelo.homeworldbackend.model.Player;
 import com.arcaelo.homeworldbackend.model.Deck;
 import com.arcaelo.homeworldbackend.repo.DeckRepository;
+import com.arcaelo.homeworldbackend.repo.PlayerRepository;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,16 +16,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 public class DeckServiceImp implements DeckService{
     private final DeckRepository deckRepository;
     private final DeckMapper deckMapper;
+    private final PlayerRepository playerRepository;
 
-    public DeckServiceImp(DeckRepository deckRepository, DeckMapper deckMapper){
+    public DeckServiceImp(DeckRepository deckRepository, DeckMapper deckMapper, PlayerRepository playerRepository){
         this.deckRepository = deckRepository;
         this.deckMapper = deckMapper;
+        this.playerRepository = playerRepository;
     }
 
     @Override
@@ -68,20 +73,36 @@ public class DeckServiceImp implements DeckService{
     @Override
     public DeckDTO saveDeck(DeckDTO deckDTO){
         Deck deck = convertToEntity(deckDTO);
+        deck.getDeckList().forEach(cp -> {
+            cp.setId(null);
+            cp.setDeck(deck);
+        });
         Deck returnDeck = deckRepository.save(deck);
         return convertToDTO(returnDeck);
     }
 
     @Override
     public DeckDTO updateDeck(Long id, DeckDTO deckDTO){
+        Deck newDeck = convertToEntity(deckDTO);
         Deck deck = deckRepository.findById(id).orElseThrow();
-        deck.setPlayer(convertToEntity(deckDTO).getPlayer());
+        deck.setPlayer(newDeck.getPlayer());
+        deck.setDeckList(newDeck.getDeckList());
+        deck.getDeckList().forEach(cp->{
+            cp.setId(null);
+            cp.setDeck(deck);
+        });
+        deck.setHideStatus(newDeck.getHideStatus());
         Deck updatedDeck = deckRepository.save(deck);
         return convertToDTO(updatedDeck);
     }
 
     @Override
     public void deleteDeck(Long id){
+        Deck deck = deckRepository.findById(id).orElseThrow();
+        Player player = playerRepository.findById(deck.getPlayer().getId()).orElseThrow();
+        player.getDecks().removeIf(d -> 
+            d.getId() == id
+        );
         deckRepository.deleteById(id);
     }
 
@@ -105,10 +126,6 @@ public class DeckServiceImp implements DeckService{
     @Override
     public DeckResponseDTO convertToResponseDTO(DeckDTO deck){
         return deckMapper.toResponseDTO(deck);
-    }
-
-    private DeckSimpleResponseDTO convertToSimpleResponseDTO(DeckDTO deck){
-        return deckMapper.toSimpleResponseDTO(deck);
     }
 
     private Deck convertToEntity(DeckDTO deckDTO){

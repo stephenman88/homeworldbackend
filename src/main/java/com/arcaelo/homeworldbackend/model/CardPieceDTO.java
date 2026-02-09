@@ -6,6 +6,7 @@ public class CardPieceDTO {
     private String cardDataUUID;
     private String editionDataUUID;
     private String imageUrl;
+    private Long deckId;
 
     public String getCardDataUUID(){return cardDataUUID;}
     @JsonProperty("card_data_uuid")
@@ -20,4 +21,7 @@ public class CardPieceDTO {
     public String getImageUrl(){return imageUrl;}
     @JsonProperty("image_url")
     public void setImageUrl(String imageUrl){this.imageUrl = imageUrl;}
+
+    public Long getDeckId(){return deckId;}
+    public void setDeckId(Long deckId){this.deckId = deckId;}
 }
