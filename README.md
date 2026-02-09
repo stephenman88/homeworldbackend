@@ -12,7 +12,7 @@ This is the backend code for a deckbuilder website for the trading card game Gra
 Command to start the server is .\gradlew bootrun
 
 ## Login and Registration
-POST /auth/register  
+**POST /auth/register**  
 Allows users to make a new account. Body should be:  
 ```
 {  
@@ -21,7 +21,7 @@ Allows users to make a new account. Body should be:
 	"name": "{display name here}"  
 }  
 ```
-POST /auth/login  
+**POST /auth/login**  
 Returns an authentication token. Expected to be returned in Header as:  
 ```
 {  
@@ -35,11 +35,11 @@ Body should be:
     "password": "{password here}"  
 }
 ```
-POST /auth/logout  
+**POST /auth/logout**  
 Logs user out by blacklisting their current token. Requires auth token
 
 ## Cards
-GET /api/card  
+**GET /api/card**  
 Returns the data for 15 unfiltered cards, or less if near the end. Accepts an integer parameter "page".  
 Response is returned the following structure:  
 ```
@@ -224,12 +224,12 @@ Response is returned the following structure:
 }
 ```
 
-GET /api/card/{id}   
+**GET /api/card/{id}**   
 Accepts a card UUID. returns the same response as above, except for that one specific card.   
 
-GET /api/card/search   
+**GET /api/card/search**   
 Searches cards based on the following parameters and returns them in the same response format as above:
-
+```
 classes={WARRIOR, CLERIC, ASSASSIN, MAGE, GUARDIAN, TAMER, RANGER}    
 costMemory, costReserve, durability, power={Integer}   
 costMemoryOperator, costReserveOperator, durabilityOperator, powerOperator={">", ">=", "=", "<=", "<"}   
@@ -250,4 +250,5 @@ subtype={subtype String}
 type={type String}   
 id={id String}   
 page={integer page}   
+```
 
