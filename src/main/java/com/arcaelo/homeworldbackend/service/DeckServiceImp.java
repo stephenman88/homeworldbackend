@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,12 +97,15 @@ public class DeckServiceImp implements DeckService{
 
     @Override
     public void deleteDeck(Long id){
+        if(id == null) return;
         Deck deck = deckRepository.findById(id).orElseThrow();
-        Player player = playerRepository.findById(deck.getPlayer().getId()).orElseThrow();
-        player.getDecks().removeIf(d -> 
-            d.getId() == id
-        );
-        deckRepository.deleteById(id);
+        if(deck != null){
+            Player player = playerRepository.findById(deck.getPlayer().getId()).orElseThrow();
+            player.getDecks().removeIf(d -> 
+                d.getId() == id
+            );
+            deckRepository.deleteById(id);
+        }
     }
 
     private DeckDTO convertToDTO(Deck deck){

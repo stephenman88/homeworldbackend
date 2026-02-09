@@ -1,7 +1,6 @@
 package com.arcaelo.homeworldbackend.model;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
