@@ -18,16 +18,6 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> testResponse(){
-        try{
-            String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-            return ResponseEntity.ok().body(userName);
-        }catch(Exception e){
-            return ResponseEntity.status(401).body("Failure to pass test api: " + e.getMessage());
-        }
-    }
-
     @GetMapping
     public ResponseEntity<PlayerDTO> getPlayerById(){
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
