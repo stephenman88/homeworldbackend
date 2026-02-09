@@ -1,33 +1,48 @@
+# Homeworld Backend
+
+[1. Intro](#intro)
+[2. Setup and Running](#setup-and-running)
+[3. Login and Registration](#login-and-registration)
+[4. Cards](#cards)
+
+## Intro
 This is the backend code for a deckbuilder website for the trading card game Grand Archive by the Weebs Of The Shore LLC.
 
+## Setup and Running
 Command to start the server is .\gradlew bootrun
 
-POST /auth/register
-Allows users to make a new account. Body should be:
-{
-    "email": "{email here}",
-    "password": "{password here}",
-	"name": "{display name here}"
+## Login and Registration
+POST /auth/register  
+Allows users to make a new account. Body should be:  
+```
+{  
+    "email": "{email here}",  
+    "password": "{password here}",  
+	"name": "{display name here}"  
+}  
+```
+POST /auth/login  
+Returns an authentication token. Expected to be returned in Header as:  
+```
+{  
+    "Authorization": "Bearer {token here}"  
+}  
+```
+Body should be:  
+```
+{  
+    "email": "{email here}",  
+    "password": "{password here}"  
 }
-
-POST /auth/login
-Returns an authentication token. Expected to be returned in Header as:
-{
-    "Authorization": "Bearer {token here}"
-}
-
-Body should be:
-{
-    "email": "{email here}",
-    "password": "{password here}"
-}
-
-POST /auth/logout
+```
+POST /auth/logout  
 Logs user out by blacklisting their current token. Requires auth token
 
-GET /api/card
-Returns the data for 15 unfiltered cards, or less if near the end. Accepts an integer parameter "page".
-Response is returned the following structure:
+## Cards
+GET /api/card  
+Returns the data for 15 unfiltered cards, or less if near the end. Accepts an integer parameter "page".  
+Response is returned the following structure:  
+```
 {
     "data": [
         {
@@ -207,30 +222,32 @@ Response is returned the following structure:
     "has_next": true,
     "total_pages": 128
 }
+```
 
-GET /api/card/{id}
-Accepts a card UUID. returns the same response as above, except for that one specific card.
+GET /api/card/{id}   
+Accepts a card UUID. returns the same response as above, except for that one specific card.   
 
-GET /api/card/search
+GET /api/card/search   
 Searches cards based on the following parameters and returns them in the same response format as above:
-classes={WARRIOR, CLERIC, ASSASSIN, MAGE, GUARDIAN, TAMER, RANGER} 
-costMemory, costReserve, durability, power={Integer}
-costMemoryOperator, costReserveOperator, durabilityOperator, powerOperator={">", ">=", "=", "<=", "<"}
-effect={backend searches for effect text on cards that contain this string} 
-setPrefix={set prefix string. refer to Grand Archive Index} can be a list
-rarity={Integer. 1 = common, 2 = uncommon, 3 = rare, 4 = super rare, 5 = ultra rare, 6 = promo, 7 = collector super rare, 8 = collector ultra rare, 9 = collector promo rare} 
-thema____Operator={">", ">=", "=", "<=", "<", ____ can be Charm, Mystique, Ferocity, Valor, Grace or Sum}
-thema____={Integer}
-element={NORM, WATER, FIRE, WIND, ASTRA, TERA, CRUX, ARCANE, LUXEM, UMBRA, EXALTED} can be a list
-flavor={backend searches for flavor text on cards that contain this string}
-legality={"STANDARD" only}
-limit={Integer} only if legality is filled in
-limitOperator={">", ">=", "=", "<=", "<"}
-name={String}
-speed={boolean, true = fast, false = slow}
-slug={String}
-subtype={subtype String}
-type={type String}
-id={id String}
-page={integer page}
+
+classes={WARRIOR, CLERIC, ASSASSIN, MAGE, GUARDIAN, TAMER, RANGER}    
+costMemory, costReserve, durability, power={Integer}   
+costMemoryOperator, costReserveOperator, durabilityOperator, powerOperator={">", ">=", "=", "<=", "<"}   
+effect={backend searches for effect text on cards that contain this string}   
+setPrefix={set prefix string. refer to Grand Archive Index} can be a list   
+rarity={Integer. 1 = common, 2 = uncommon, 3 = rare, 4 = super rare, 5 = ultra rare, 6 = promo, 7 = collector super rare, 8 = collector ultra rare, 9 = collector promo rare}    
+thema____Operator={">", ">=", "=", "<=", "<", ____ can be Charm, Mystique, Ferocity, Valor, Grace or Sum}   
+thema____={Integer}   
+element={NORM, WATER, FIRE, WIND, ASTRA, TERA, CRUX, ARCANE, LUXEM, UMBRA, EXALTED} can be a list   
+flavor={backend searches for flavor text on cards that contain this string}   
+legality={"STANDARD" only}   
+limit={Integer} only if legality is filled in   
+limitOperator={">", ">=", "=", "<=", "<"}   
+name={String}   
+speed={boolean, true = fast, false = slow}   
+slug={String}   
+subtype={subtype String}   
+type={type String}   
+id={id String}   
+page={integer page}   
 
