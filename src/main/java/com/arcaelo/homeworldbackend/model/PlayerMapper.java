@@ -22,6 +22,7 @@ public abstract class PlayerMapper{
         Player player = new Player();
         player.setId(playerDTO.getId());
         player.setEmail(playerDTO.getEmail());
+        player.setName(playerDTO.getName());
 
         if (playerDTO.getDeckIds() != null){
             Set<Deck> set = new HashSet<>();

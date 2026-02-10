@@ -51,7 +51,7 @@ public class PlayerServiceImp implements PlayerService{
     @Override
     public PlayerDTO updatePlayer(Long id, PlayerDTO playerDTO){
         Player player = playerRepository.findById(id).orElseThrow();
-        player.setEmail(playerDTO.getEmail());
+        if(playerDTO.getName() != null) player.setName(playerDTO.getName());
         Player updatedPlayer = playerRepository.save(player);
         return convertToDTO(updatedPlayer);
     }

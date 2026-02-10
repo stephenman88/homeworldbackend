@@ -10,7 +10,9 @@ import com.arcaelo.homeworldbackend.model.Deck;
 import com.arcaelo.homeworldbackend.repo.DeckRepository;
 import com.arcaelo.homeworldbackend.repo.PlayerRepository;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -49,8 +51,9 @@ public class DeckServiceImp implements DeckService{
 
     @Override
     public List<DeckSimpleResponseDTO> getSampleDecks(){
-        Pageable p = Pageable.ofSize(20);
-        return deckRepository.findAll(p).stream().map(this::convertToSimpleResponseDTO).collect(Collectors.toList());
+        Specification<Deck> spec = getByPublicStatus();
+        Pageable p = PageRequest.of(0, 20, Sort.by("id").descending());
+        return deckRepository.findAll(spec, p).stream().map(this::convertToSimpleResponseDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -139,6 +142,12 @@ public class DeckServiceImp implements DeckService{
             if(playerId == null) return null;
             
             return criteriaBuilder.equal(root.get("player").get("id"), playerId);
+        };
+    }
+
+    private Specification<Deck> getByPublicStatus(){
+        return (root, query, criteriaBuilder) -> {
+            return criteriaBuilder.like(root.get("hideStatus"), "PUBLIC");
         };
     }
 }
