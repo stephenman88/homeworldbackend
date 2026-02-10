@@ -1,9 +1,11 @@
 # Homeworld Backend
 
-[1. Intro](#intro)
-[2. Setup and Running](#setup-and-running)
-[3. Login and Registration](#login-and-registration)
-[4. Cards](#cards)
+1. [Intro](#intro)
+2. [Setup and Running](#setup-and-running)
+3. [Login and Registration](#login-and-registration)
+4. [Cards](#cards)
+5. [Players](#players)
+6. [Deck](#deck)
 
 ## Intro
 This is the backend code for a deckbuilder website for the trading card game Grand Archive by the Weebs Of The Shore LLC.
@@ -252,3 +254,103 @@ id={id String}
 page={integer page}   
 ```
 
+## Players
+**GET /api/player**   
+Returns user data in the following format:   
+```
+{
+    "id": "playerId",
+    "email": "player email",
+    "name": "display name",
+    "deckIds": [
+        "list of Integer Id"
+    ]
+}
+```
+
+**PUT /api/player**   
+Updates the display name of the player   
+```
+{
+    "name": "new name here"
+}
+```
+
+## Deck
+**GET /api/deck**   
+A simplified list of user's deck. Returned list looks as follows:   
+```
+[
+    {
+        "id": deck_id,
+        "display_card_url": "url",
+        "hide_status": "PUBLIC"
+    }
+]
+```
+
+**GET /api/deck/random**
+Pulls up 20 of the last public decks. Same format as /api/deck
+
+**GET /api/deck/{id}**
+Pulls up the deck with the matching deck Id. Only works if the deck is public, private, or is hidden and the user is the deck owner and logged in.   
+```
+{
+    "id": 5,
+    "display_card_url": "/cards/images/dyhxw5d9n5.jpg",
+    "deck_list": [
+        {
+            "deckId": 5,
+            "card_data_uuid": "q6prapdczd",
+            "edition_data_uuid": "dyhxw5d9n5",
+            "image_url": "/cards/images/dyhxw5d9n5.jpg"
+        }
+    ],
+    "hide_status": "PUBLIC"
+}
+```
+
+**POST /api/deck/new**
+Creates a new deck under the logged in user. Accepts a body as follows:
+```
+{
+    "hide_status": "PUBLIC",
+    "display_edition_id": "dyhxw5d9n5",
+    "deck_list": [
+        {
+            "card_data_uuid": "q6prapdczd",
+            "edition_data_uuid": "dyhxw5d9n5",
+            "image_url": null
+        }, {
+            "card_data_uuid": "DpHDGaX2Pn",
+            "edition_data_uuid": "8kskierp5t",
+            "image_url": null
+        }
+    ]
+}
+```
+Returns the full decklist like /api/deck/{id}
+
+**PUT /api/deck/{id}**
+Updates the deck if the user is logged in and owns the deck. Accepts the following body:
+```
+{
+    "hide_status": "PUBLIC",
+    "display_edition_id": "dyhxw5d9n5",
+    "deck_list": [
+        {
+            "card_data_uuid": "q6prapdczd",
+            "edition_data_uuid": "dyhxw5d9n5",
+            "image_url": null
+        }, {
+            "card_data_uuid": "DpHDGaX2Pn",
+            "edition_data_uuid": "8kskierp5t",
+            "image_url": null
+        }
+    ]
+}
+```
+Returns an updated full decklist like /api/deck/{id}
+
+**DELETE /api/deck/{id}**
+Deletes the deck if the user is logged in and owns the deck.
